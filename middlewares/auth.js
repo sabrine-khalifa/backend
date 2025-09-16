@@ -10,11 +10,9 @@ module.exports = (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
-  console.log("Token extrait:", token);
 
   // 🔹 Ligne à ajouter pour debug
   const decoded = jwt.decode(token);
-  console.log("Token iat:", decoded.iat, "exp:", decoded.exp, "now:", Math.floor(Date.now() / 1000));
 
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
@@ -25,7 +23,6 @@ module.exports = (req, res, next) => {
       return res.status(401).json({ erreur: "Token invalide : ID utilisateur manquant" });
     }
 
-    console.log("✅ req.userId défini :", req.userId);
     next();
   } catch (err) {
  console.error("❌ Erreur JWT :", err.message);
