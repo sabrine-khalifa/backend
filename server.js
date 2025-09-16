@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
-const bodyParser = require('body-parser');
 const reservationRoutes = require('./routes/reservation');
 
 
