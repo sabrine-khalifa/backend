@@ -26,6 +26,5 @@ router.post('/refreshToken', refreshToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.put('/:id', verifyToken, upload.single("photo"), updateUser);
-//router.get("/:id", getUserById);
 
 module.exports = router;
