@@ -67,6 +67,8 @@ langues: role === 'createur' && Array.isArray(langues)
       publicCible: role === 'createur' ? publicCible : undefined,
       liens: role === 'createur' ? liens : undefined,
     });
+        await newUser.save();
+
 
     res.status(201).json({ 
       msg: "Utilisateur enregistré avec succès." 
