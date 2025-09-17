@@ -1,18 +1,31 @@
-// routes/auth.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const authController = require("../controllers/authController");
-const multer = require("multer");
+const multer = require('multer');
+const path = require('path');
 
-// config multer
-const upload = multer({ storage: multer.memoryStorage() });
+const { register, login, refreshToken, updateUser, forgotPassword, resetPassword, getUserById } = require('../controllers/authController');
+const verifyToken = require('../middlewares/auth'); // ✅ Import corrigé
 
-// D’abord les routes fixes
-router.post("/register", upload.single("photo"), authController.register);
-router.post("/login", authController.login);
-router.post("/refreshToken", authController.refreshToken);
+// Config Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Dossier de destination
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Nom unique
+  }
+});
 
-// Ensuite seulement les dynamiques
-router.get("/:id", authController.getUserById);
+const upload = multer({ storage });
+
+// Routes
+router.post('/register', upload.single('photo'), register);
+router.post('/login', login);
+router.post('/refreshToken', refreshToken);
+
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password/:token', resetPassword);
+router.put('/:id', verifyToken, upload.single("photo"), updateUser);
+router.get("/:id", getUserById);
 
 module.exports = router;

@@ -21,8 +21,9 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // servir les images
+app.use('/api/users', require('./routes/auth'));
+
 app.use('/api/services', require('./routes/serviceRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/reservations', reservationRoutes);
 app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/avis", require("./routes/avisRoutes"));
