@@ -31,8 +31,7 @@ exports.register = async (req, res) => {
     liens
   } = req.body;
 
-  const photo = req.file ? `/uploads/${req.file.filename}` : "";
-
+const photo = req.file ? req.file.path : "";
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -191,12 +190,9 @@ exports.updateUser = async (req, res) => {
     }
 
     // Photo
-    if (req.file) {
-      if (user.photo) {
-        const oldPath = path.join(process.cwd(), user.photo);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      }
-      user.photo = "/uploads/" + req.file.filename;
+  if (req.file) {
+      user.photo = req.file.path; // ✅ URL Cloudinary
+      // Pas de suppression locale nécessaire
     }
 
     await user.save();

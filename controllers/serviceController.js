@@ -48,8 +48,7 @@ exports.createService = async (req, res) => {
     }
 
     // 🔹 Récupération des images envoyées (si multiples)
-const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
-
+const images = req.files ? req.files.map(file => file.path) : [];
     // --- CRÉATION ---
     const categoriesArray  = Array.isArray(req.body.categories)
   ? req.body.categories
@@ -233,7 +232,7 @@ exports.updateService = async (req, res) => {
     // Gérer les images — seulement si de nouvelles sont uploadées
     let images = service.images; // par défaut, on garde les anciennes
     if (req.files && req.files.length > 0) {
-      images = req.files.map(file => `/uploads/${file.filename}`);
+  images = req.files.map(file => file.path); // ✅ Utilise file.path
     }
 
     // Mettre à jour le service

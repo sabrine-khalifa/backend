@@ -4,6 +4,10 @@ const router = express.Router();
 const multer = require("multer");
 const Avis = require("../models/Avis");
 const Service = require("../models/Service"); // ✅ Ajoute cette ligne
+const { storage } = require('../config/cloudinary'); // ✅ Importe Cloudinary
+
+
+const upload = multer({ storage });
 
 
 // Stockage en mémoire (ou tu peux utiliser diskStorage pour sauvegarder sur disque)
@@ -14,18 +18,9 @@ const { reserverService } = require("../controllers/serviceController");
 const { getServicesDisponiblesByCreator } = require('../controllers/serviceController');
 
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + file.originalname;
-    cb(null, uniqueSuffix);
-  }
-});
-const upload = multer({ storage: storage });
 
-router.post('/', authMiddleware, upload.array("image", 8), serviceController.createService);
+
+router.post('/', authMiddleware, upload.array("image"), serviceController.createService);
 router.get('/', serviceController.getServices);
 router.get('/:id', serviceController.getServiceById);
 router.post("/:id/reserver", authMiddleware, reserverService);

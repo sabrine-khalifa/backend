@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { storage } = require('../config/cloudinary'); // ✅ Importe Cloudinary
 const multer = require('multer');
 const path = require('path');
 
@@ -7,15 +8,6 @@ const { register, login, refreshToken, updateUser, forgotPassword, resetPassword
 const verifyToken = require('../middlewares/auth'); // ✅ Import corrigé
 
 // Config Multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Dossier de destination
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Nom unique
-  }
-});
-
 const upload = multer({ storage });
 
 // Routes
