@@ -20,7 +20,7 @@ const { getServicesDisponiblesByCreator } = require('../controllers/serviceContr
 
 
 
-router.post('/', authMiddleware, upload.array("images"), serviceController.createService);
+router.post('/', authMiddleware, upload.array("image"), serviceController.createService);
 router.get('/', serviceController.getServices);
 router.get('/:id', serviceController.getServiceById);
 router.post("/:id/reserver", authMiddleware, reserverService);
