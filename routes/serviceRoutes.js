@@ -10,7 +10,6 @@ const { storage } = require('../config/cloudinary'); // ✅ Importe Cloudinary
 const upload = multer({ storage });
 
 
-// Stockage en mémoire (ou tu peux utiliser diskStorage pour sauvegarder sur disque)
 const serviceController = require('../controllers/serviceController');
 const authMiddleware = require('../middlewares/auth');
 const getServiceById =require('../controllers/serviceController');
