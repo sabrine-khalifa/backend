@@ -1,8 +1,6 @@
 // config/cloudinary.js
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('cloudinary').v2; // ✅ .v2 existe seulement en v2+
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
-console.log("✅ Cloudinary config chargée"); // 🔥 Debug
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -13,8 +11,8 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'openup/images', // Dossier virtuel sur Cloudinary
-    allowed_formats: ['jpg', 'png', 'jpeg', 'gif'],
+    folder: 'openup/image',
+    allowed_formats: ['jpg', 'png', 'jpeg'],
     resource_type: 'image',
   },
 });
