@@ -1,4 +1,3 @@
-console.log("🚀 Chargement de serviceRoutes");
 
 const express = require('express');
 const router = express.Router();

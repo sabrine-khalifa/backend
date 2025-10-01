@@ -19,4 +19,7 @@ const storage = new CloudinaryStorage({
   },
 });
 
+console.log("✅ CloudinaryStorage prêt");
+
+
 module.exports = { cloudinary, storage };
