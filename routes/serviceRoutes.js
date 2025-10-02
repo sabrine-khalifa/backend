@@ -20,10 +20,15 @@ const { getServicesDisponiblesByCreator } = require('../controllers/serviceContr
 
 router.post(
   "/",
-    authMiddleware,
-  upload.array("image", 5), // 🔹 champ "images" = nom utilisé dans ton frontend formData.append("images", file)
+  authMiddleware,
+  upload.array("image", 5),
+  (req, res, next) => {
+    console.log("🔍 DEBUG files:", req.files);
+    next();
+  },
   serviceController.createService
 );
+
 router.get('/', serviceController.getServices);
 router.get('/:id', serviceController.getServiceById);
 router.post("/:id/reserver", authMiddleware, reserverService);
