@@ -21,6 +21,10 @@ const { getServicesDisponiblesByCreator } = require('../controllers/serviceContr
 router.post(
   "/",
   authMiddleware,
+  (req, res, next) => {
+    console.log("🛠️ Storage utilisé:", upload.storage.constructor.name);
+    next();
+  },
   upload.array("image", 5),
   (req, res, next) => {
     console.log("🔍 DEBUG files:", req.files);
@@ -28,6 +32,7 @@ router.post(
   },
   serviceController.createService
 );
+
 
 router.get('/', serviceController.getServices);
 router.get('/:id', serviceController.getServiceById);
