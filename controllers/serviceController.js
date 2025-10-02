@@ -48,7 +48,7 @@ exports.createService = async (req, res) => {
     }
 
     // 🔹 Récupération des images envoyées (si multiples)
-const images = req.files ? req.files.map(file => file.path) : [];
+    const images = req.files ? req.files.map(file => file.path) : [];
     // --- CRÉATION ---
     const categoriesArray  = Array.isArray(req.body.categories)
   ? req.body.categories
