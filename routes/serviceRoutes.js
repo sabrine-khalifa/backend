@@ -1,105 +1,36 @@
-
 const express = require('express');
 const router = express.Router();
-const multer = require("multer");
-const Avis = require("../models/Avis");
-const Service = require("../models/Service"); // ✅ Ajoute cette ligne
-const { storage } = require('../config/cloudinary'); // ✅ Importe Cloudinary
-
-
+const { storage } = require('./config/cloudinary');
+const multer = require('multer');
 const upload = multer({ storage });
 
+const Service = require('./models/Service'); // ou votre modèle
 
-const serviceController = require('../controllers/serviceController');
-const authMiddleware = require('../middlewares/auth');
-const getServiceById =require('../controllers/serviceController');
-const { reserverService } = require("../controllers/serviceController");
-const { getServicesDisponiblesByCreator } = require('../controllers/serviceController');
-
-
-
-router.post(
-  "/",
-  authMiddleware,
-  (req, res, next) => {
-    console.log("🛠️ Storage utilisé:", upload.storage.constructor.name);
-    next();
-  },
-  upload.array("image", 5),
-  (req, res, next) => {
-    console.log("🔍 DEBUG files:", req.files);
-    next();
-  },
-  serviceController.createService
-);
-
-
-router.get('/', serviceController.getServices);
-router.get('/:id', serviceController.getServiceById);
-router.post("/:id/reserver", authMiddleware, reserverService);
-router.get('/creator/:creatorId/disponibles', getServicesDisponiblesByCreator);
-
-
-router.get("/user/:userId", async (req, res) => {
+router.post('/services', upload.single('image'), async (req, res) => {
   try {
-    const avis = await Avis.find()
-      .populate("auteur")
-      .populate("service");
+    const { titre, description, typePrestation, creditsProposes, dateService, heure, duree, lieu } = req.body;
 
-    const filteredAvis = avis.filter(a => 
-      a.service?.createur?.toString() === req.params.userId
-    );
+    // L'image téléchargée est maintenant sur Cloudinary
+    const imageUrl = req.file.path; // CloudinaryStorage stocke l'URL ici
 
-    res.json(filteredAvis);
-  } catch (err) {
-    res.status(500).json({ msg: "Erreur serveur" });
-  }
-});
-
-
-router.get("/:id/avis", async (req, res) => {
-  try {
-    const avis = await Avis.find({ service: req.params.id }).populate("auteur", "name prenom photo");
-    res.json(avis);
-  } catch (err) {
-    res.status(500).json({ msg: "Erreur lors du chargement des avis" });
-  }
-});
-
-router.post("/:id/avis", authMiddleware, async (req, res) => {
-  try {
-    const { commentaire } = req.body;
-
-    if (!commentaire) return res.status(400).json({ msg: "Le commentaire est requis" });
-
-    const newAvis = new Avis({
-      service: req.params.id,
-      auteur: req.user.id, // ID de l'utilisateur connecté
-      commentaire,
+    const newService = await Service.create({
+      titre,
+      description,
+      typePrestation,
+      creditsProposes,
+      dateService,
+      heure,
+      duree,
+      lieu,
+      images: [imageUrl],
+      createur: req.user.id,
     });
 
-    await newAvis.save();
-
-    // Optionnel : populate pour renvoyer les infos de l'auteur
-    await newAvis.populate("auteur", "name prenom photo");
-
-    res.json(newAvis);
+    res.status(201).json({ message: 'Service créé avec succès.', service: newService });
   } catch (err) {
-    res.status(500).json({ msg: "Erreur lors de l'ajout de l'avis" });
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
-
-// ✅ Route : tous les services d'un utilisateur (le créateur)
-router.get("/serv/user/:userId", async (req, res) => {
-  try {
-    const services = await Service.find({ createur: req.params.userId });
-    res.json(services);
-  } catch (err) {
-    console.error("Erreur /services/user/:userId :", err);
-    res.status(500).json({ msg: "Erreur serveur" });
-  }
-});
-
-router.put('/:id', authMiddleware, upload.array('image'), serviceController.updateService);
 
 module.exports = router;
