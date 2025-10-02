@@ -19,6 +19,9 @@ exports.getServices = async (req, res) => {
 // Créer un nouveau service
 exports.createService = async (req, res) => {
   try {
+    console.log("🎯 Début createService");
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
     const {
    titre, description, categories, typePrestation, creditsProposes,
       prix, dateService, heure, duree, typeCours, publicCible, accessiblePMR,
