@@ -13,7 +13,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'services',
+    folder: 'openup/image',
     allowed_formats: ['jpg', 'png', 'jpeg'],
     resource_type: 'image',
   },
