@@ -22,70 +22,41 @@ exports.createService = async (req, res) => {
     console.log("🎯 Début createService");
     console.log("BODY:", req.body);
     console.log("FILES:", req.files);
-    const {
-   titre, description, categories, typePrestation, creditsProposes,
-      prix, dateService, heure, duree, typeCours, publicCible, accessiblePMR,
-      lieu, nombrePlaces
-    } = req.body;
 
-    const createur = req.userId;
-
-    // --- VALIDATIONS ---
-    if (!titre || titre.length < 3) {
-      return res.status(400).json({ erreur: 'Titre invalide.' });
-    }
-    if (!description || description.length < 10) {
-      return res.status(400).json({ erreur: 'Description invalide.' });
-    }
-    if (!creditsProposes || creditsProposes < 1) {
-      return res.status(400).json({ erreur: 'Crédits invalides.' });
-    }
-    if (typePrestation === 'Présentiel' && (!prix || prix <= 0)) {
-      return res.status(400).json({ erreur: 'Prix requis pour une prestation présentielle.' });
-    }
-    if (!dateService || !lieu) {
-      return res.status(400).json({ erreur: 'Date ou lieu manquant.' });
-    }
-    if (!createur || createur === "null") {
-      return res.status(401).json({ erreur: "Utilisateur non authentifié (createur manquant)." });
+    if (!req.files || req.files.length === 0) {
+      console.log("⚠️ Pas de fichier reçu");
+      return res.status(400).json({ message: "Aucune image reçue" });
     }
 
-    // 🔹 Récupération des images envoyées (si multiples)
-    const images = req.files ? req.files.map(file => file.path) : [];
-    console.log("FILES:", req.files)
-    // --- CRÉATION ---
-    const categoriesArray  = Array.isArray(req.body.categories)
-  ? req.body.categories
-  : [req.body.categories].filter(Boolean); // pour éviter undefined
+    console.log("🚀 Upload vers Cloudinary...");
+    const uploadedImages = [];
 
-      const newService = new Service({
-      titre,
-      description,
-      categories: categoriesArray,
-      typePrestation,
-      creditsProposes,
-      prix: typePrestation === 'Présentiel' ? prix : undefined,
-      images,
-      dateService,
-      heure,
-      duree,
-      typeCours,
-      publicCible,
-      accessiblePMR,
-      lieu,
-      nombrePlaces,
-      createur,
+    for (let file of req.files) {
+      try {
+        console.log("➡️ Upload fichier:", file.path);
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "services",
+        });
+        console.log("✅ Cloudinary OK:", result.secure_url);
+        uploadedImages.push(result.secure_url);
+      } catch (err) {
+        console.error("❌ Erreur upload Cloudinary:", err.message);
+      }
+    }
+
+    const newService = new Service({
+      ...req.body,
+      images: uploadedImages,
+      user: req.user.id,
     });
 
-    console.log("BODY:", req.body);
-    console.log("FILES:", req.files);
+    await newService.save();
+    console.log("🎉 Service créé:", newService);
 
-    const saved = await newService.save();
-    res.status(201).json({ message: 'Service créé avec succès.', service: saved });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ erreur: 'Erreur serveur.' });
+    res.status(201).json(newService);
+  } catch (error) {
+    console.error("🔥 Erreur createService:", error.message);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
 
