@@ -4,10 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const Avis = require("../models/Avis");
 const Service = require("../models/Service"); // ✅ Ajoute cette ligne
-const { storage } = require('../config/cloudinary'); // ✅ Importe Cloudinary
 
-
-const upload = multer({ storage });
 
 
 const serviceController = require('../controllers/serviceController');
@@ -17,6 +14,53 @@ const { reserverService } = require("../controllers/serviceController");
 const { getServicesDisponiblesByCreator } = require('../controllers/serviceController');
 
 console.log("🚀 Chargement de serviceRoutes");
+
+require('dotenv').config();
+
+// ✅ Configuration Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+console.log("☁️ Cloudinary configuré :", process.env.CLOUDINARY_CLOUD_NAME);
+
+// ✅ Stockage en mémoire (pas sur disque)
+const upload = multer({ storage: multer.memoryStorage() });
+
+// ✅ Middleware pour uploader vers Cloudinary
+const uploadToCloudinary = async (req, res, next) => {
+  if (!req.files || req.files.length === 0) {
+    return next();
+  }
+
+  try {
+    const uploadPromises = req.files.map(file => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'openup/images',
+            resource_type: 'image',
+            format: file.mimetype.split('/')[1],
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result.secure_url); // URL complète HTTPS
+          }
+        );
+        stream.end(file.buffer);
+      });
+    });
+
+    req.cloudinaryUrls = await Promise.all(uploadPromises);
+    console.log("✅ Images uploadées sur Cloudinary:", req.cloudinaryUrls);
+    next();
+  } catch (err) {
+    console.error("❌ Échec upload Cloudinary:", err);
+    return res.status(500).json({ erreur: "Échec de l'upload de l'image" });
+  }
+};
 
 
 router.post(

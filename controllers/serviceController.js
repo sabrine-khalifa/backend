@@ -19,9 +19,9 @@ exports.getServices = async (req, res) => {
 // Créer un nouveau service
 exports.createService = async (req, res) => {
   try {
-    console.log("🎯 Début createService");
+   console.log("🎯 Début createService");
     console.log("BODY:", req.body);
-    console.log("FILES:", req.files);
+    console.log("CLOUDINARY URLs:", req.cloudinaryUrls); // ✅ Clé du succès
     const {
    titre, description, categories, typePrestation, creditsProposes,
       prix, dateService, heure, duree, typeCours, publicCible, accessiblePMR,
@@ -51,7 +51,7 @@ exports.createService = async (req, res) => {
     }
 
     // 🔹 Récupération des images envoyées (si multiples)
-    const images = req.files ? req.files.map(file => file.path) : [];
+    const images = req.cloudinaryUrls || [];
     console.log("FILES:", req.files)
     // --- CRÉATION ---
     const categoriesArray  = Array.isArray(req.body.categories)
