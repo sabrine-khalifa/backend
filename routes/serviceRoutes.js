@@ -4,7 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const Avis = require("../models/Avis");
 const Service = require("../models/Service"); // ✅ Ajoute cette ligne
-
+const cloudinary = require('cloudinary').v2; // <-- Cette ligne manque !
 
 
 const serviceController = require('../controllers/serviceController');
@@ -16,6 +16,13 @@ const { getServicesDisponiblesByCreator } = require('../controllers/serviceContr
 console.log("🚀 Chargement de serviceRoutes");
 
 require('dotenv').config();
+
+// ✅ Vérification des clés
+console.log("🚀 Chargement de serviceRoutes");
+console.log("☁️ CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("🔑 CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY ? "OK" : "❌ MANQUANTE");
+console.log("🔐 CLOUDINARY_API_SECRET:", process.env.CLOUDINARY_API_SECRET ? "OK (masquée)" : "❌ MANQUANTE");
+
 
 // ✅ Configuration Cloudinary
 cloudinary.config({
