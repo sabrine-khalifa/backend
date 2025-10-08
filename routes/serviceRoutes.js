@@ -66,17 +66,11 @@ const uploadToCloudinary = async (req, res, next) => {
 router.post(
   "/",
   authMiddleware,
-  (req, res, next) => {
-    console.log("🛠️ Storage utilisé:", upload.storage.constructor.name);
-    next();
-  },
-  upload.array("image", 5),
-  (req, res, next) => {
-    console.log("🔍 DEBUG files:", req.files);
-    next();
-  },
-  serviceController.createService
+  upload.array("image", 5),       // 1. Reçoit les fichiers en mémoire
+  uploadToCloudinary,             // 2. Upload vers Cloudinary
+  serviceController.createService // 3. Sauvegarde avec URLs
 );
+
 
 
 router.get('/', serviceController.getServices);
