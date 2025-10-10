@@ -18,7 +18,6 @@ console.log("🚀 Chargement de serviceRoutes");
 require('dotenv').config();
 
 // ✅ Vérification des clés
-console.log("🚀 Chargement de serviceRoutes");
 console.log("☁️ CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
 console.log("🔑 CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY ? "OK" : "❌ MANQUANTE");
 console.log("🔐 CLOUDINARY_API_SECRET:", process.env.CLOUDINARY_API_SECRET ? "OK (masquée)" : "❌ MANQUANTE");
