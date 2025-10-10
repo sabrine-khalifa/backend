@@ -13,7 +13,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log("☁️ Cloudinary configuré pour auth");
 
 // ✅ Stockage en mémoire
 const upload = multer({ storage: multer.memoryStorage() });
