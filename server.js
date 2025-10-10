@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+console.log("🔄 Déploiement forcé - 10 octobre 2025");
 console.log("server est chargée");
 
 // Connexion DB
