@@ -9,14 +9,22 @@ const reservationRoutes = require('./routes/reservation');
 const app = express();
 
 
+const allowedOrigins = [
+  "https://openup-one.vercel.app", // ton site en ligne
+  "http://localhost:3000"          // utile pour tes tests en local
+];
+
 app.use(cors({
-  origin: [
-    "https://openup-one.vercel.app", // ton app déployée sur Vercel
-    "http://localhost:3000" // utile pour tester en local
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // si tu utilises des cookies ou tokens
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
