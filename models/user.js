@@ -38,7 +38,11 @@ const userSchema = new mongoose.Schema({
     type: String, 
     enum: ['graine', 'herbe', 'etabli'], 
     default: 'herbe' 
-  }
+  },
+
+  isEmailVerified: { type: Boolean, default: false }, // ← nouveau champ
+  emailVerificationToken: { type: String }, // optionnel, pour stocker le token temporaire
+  emailVerificationExpires: { type: Date }
 });
 
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);

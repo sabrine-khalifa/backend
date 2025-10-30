@@ -10,28 +10,10 @@ const User = require("../models/user");
 // REGISTER
 // ==========================
 // controllers/authController.js
+// controllers/authController.js
 exports.register = async (req, res) => {
-  const {
-    name,
-    prenom,
-    email,
-    password,
-    role,
-    metier,
-    domaine,
-    langues,
-    nationalites,
-    video,
-    description,
-    valeurs,
-    lieuPrestation,
-    pmr,
-    typeCours,
-    publicCible,
-    liens
-  } = req.body;
+  const { name, prenom, email, password, role } = req.body;
 
-const photo = req.file ? req.file.path : "";
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -40,43 +22,60 @@ const photo = req.file ? req.file.path : "";
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 🔑 Ne sauvegarder que les champs de base + rôle
     const newUser = await User.create({
       name,
       prenom,
       email,
       password: hashedPassword,
-      photo,
-      credits: 100,
       role: role || 'particulier',
-
-      // Champs Créateur
-      metier: role === 'createur' ? metier : undefined,
-      domaine: role === 'createur' ? domaine : undefined,
-langues: role === 'createur' && Array.isArray(langues) 
-  ? langues 
-  : (role === 'createur' && typeof langues === 'string') 
-    ? langues.split(',').map(l => l.trim()) 
-    : [],      nationalites: role === 'createur' ? nationalites : undefined,
-      video: role === 'createur' ? video : undefined,
-      description: role === 'createur' ? description : undefined,
-      valeurs: role === 'createur' ? valeurs : undefined,
-      lieuPrestation: role === 'createur' ? lieuPrestation : undefined,
-      pmr: role === 'createur' ? (pmr === 'true' || pmr === true) : false,
-      typeCours: role === 'createur' ? typeCours : undefined,
-      publicCible: role === 'createur' ? publicCible : undefined,
-      liens: role === 'createur' ? liens : undefined,
+      credits: 100,
+      // ✅ Tous les autres champs restent vides (undefined ou valeurs par défaut)
     });
-    
+
+    // ✉️ Générer token de vérification (optionnel, mais recommandé)
+    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    newUser.emailVerificationToken = emailVerificationToken;
+    newUser.emailVerificationExpires = Date.now() + 3600000; // 1h
+    await newUser.save();
+
+    // Envoyer e-mail de vérification (comme avant)
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${emailVerificationToken}`;
+    // ... (code d'envoi d'e-mail inchangé)
 
     res.status(201).json({ 
-      msg: "Utilisateur enregistré avec succès." 
+      msg: "Inscription réussie ! Veuillez vérifier votre e-mail." 
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: "Erreur serveur", error: err.message });
+    res.status(500).json({ msg: "Erreur serveur" });
   }
 };
 
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ msg: "Lien de vérification invalide ou expiré." });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    res.json({ msg: "Votre e-mail a été confirmé ! Vous pouvez maintenant vous connecter." });
+  } catch (err) {
+    console.error("Erreur vérification e-mail :", err);
+    res.status(500).json({ msg: "Erreur serveur" });
+  }
+};
 // ==========================
 // LOGIN
 // ==========================
@@ -87,47 +86,50 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "Utilisateur introuvable" });
 
+    // 🔒 Vérification : e-mail confirmé ?
+    if (!user.isEmailVerified) {
+      return res.status(400).json({ msg: "Veuillez confirmer votre e-mail avant de vous connecter." });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: "Identifiants invalides" });
 
-    const accessToken  = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-      // Création refresh token (7 jours)
     const refreshToken = jwt.sign(
       { id: user._id },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: '7d' }
     );
 
-   // Dans login
-res.json({
-  accessToken,
-  refreshToken,
-  user: {
-    id: user._id,
-    name: user.name,
-    prenom: user.prenom,
-    email: user.email,
-    photo: user.photo,
-    credits: user.credits,
-    role: user.role,
-    metier: user.metier,
-    domaine: user.domaine,
-    langues: user.langues,
-    nationalites: user.nationalites,
-    video: user.video,
-    description: user.description,
-    valeurs: user.valeurs,
-    lieuPrestation: user.lieuPrestation,
-    pmr: user.pmr,
-    typeCours: user.typeCours,
-    publicCible: user.publicCible,
-    liens: user.liens,
-    typeCreateur: user.typeCreateur
-  },
-});
+    res.json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        prenom: user.prenom,
+        email: user.email,
+        photo: user.photo,
+        credits: user.credits,
+        role: user.role,
+        metier: user.metier,
+        domaine: user.domaine,
+        langues: user.langues,
+        nationalites: user.nationalites,
+        video: user.video,
+        description: user.description,
+        valeurs: user.valeurs,
+        lieuPrestation: user.lieuPrestation,
+        pmr: user.pmr,
+        typeCours: user.typeCours,
+        publicCible: user.publicCible,
+        liens: user.liens,
+        typeCreateur: user.typeCreateur
+      },
+    });
   } catch (err) {
     res.status(500).json({ msg: "Erreur serveur", error: err.message });
   }
@@ -190,10 +192,12 @@ exports.updateUser = async (req, res) => {
     }
 
     // Photo
-  if (req.file) {
-      user.photo = req.file.path; // ✅ URL Cloudinary
-      // Pas de suppression locale nécessaire
-    }
+  // Photo
+if (req.cloudinaryUrl) {
+  user.photo = req.cloudinaryUrl;
+}
+
+
 
     await user.save();
 

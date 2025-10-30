@@ -63,5 +63,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.put('/:id', verifyToken, upload.single('photo'), uploadToCloudinary, updateUser);
 router.get("/:id", getUserById);
+router.get('/verify-email/:token', authController.verifyEmail);
 
 module.exports = router;
