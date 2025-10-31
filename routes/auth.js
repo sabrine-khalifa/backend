@@ -39,6 +39,7 @@ const uploadToCloudinary = async (req, res, next) => {
 
     req.cloudinaryUrl = result;
     console.log("✅ Photo uploadée sur Cloudinary:", result);
+    console.log("hello");
     next();
   } catch (err) {
     console.error("❌ Échec upload photo:", err);
