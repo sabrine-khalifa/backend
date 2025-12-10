@@ -5,7 +5,6 @@ const serviceSchema = new mongoose.Schema({
   description: { type: String, required: true, minlength: 10 },
   categories: [ {type: String} ],
   typePrestation: { type: String, enum: ['Présentiel', 'En ligne'], required: true },
-  prix: { type: Number },
   images:  [{ type: String }],
   lieu: { type: String },
   dateService: { type: Date },

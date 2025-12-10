@@ -23,8 +23,7 @@ exports.createService = async (req, res) => {
     console.log("BODY:", req.body);
     console.log("CLOUDINARY URLs:", req.cloudinaryUrls); // ✅ Clé du succès
     const {
-   titre, description, categories, typePrestation, creditsProposes,
-      prix, dateService, heure, duree, typeCours, publicCible, accessiblePMR,
+   titre, description, categories, typePrestation, creditsProposes, dateService, heure, duree, typeCours, publicCible, accessiblePMR,
       lieu, nombrePlaces
     } = req.body;
 
@@ -75,7 +74,6 @@ if (!lieu || lieu.trim() === "") {
       categories: categoriesArray,
       typePrestation,
       creditsProposes,
-      prix: typePrestation === 'Présentiel' ? prix : undefined,
       images,
       dateService,
       heure,
@@ -210,7 +208,6 @@ exports.updateService = async (req, res) => {
       categories,
       typePrestation,
       creditsProposes,
-      prix,
       dateService,
       heure,
       duree,
@@ -250,7 +247,6 @@ exports.updateService = async (req, res) => {
     service.categories = categoriesArray || service.categories;
     service.typePrestation = typePrestation || service.typePrestation;
     service.creditsProposes = creditsProposes || service.creditsProposes;
-    service.prix = typePrestation === 'Présentiel' ? (prix || service.prix) : undefined;
     service.images = images;
     service.dateService = dateService || service.dateService;
     service.heure = heure || service.heure;
