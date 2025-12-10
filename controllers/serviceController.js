@@ -40,12 +40,23 @@ exports.createService = async (req, res) => {
     if (!creditsProposes || creditsProposes < 1) {
       return res.status(400).json({ erreur: 'Crédits invalides.' });
     }
-    if (typePrestation === 'Présentiel' && (!prix || prix <= 0)) {
-      return res.status(400).json({ erreur: 'Prix requis pour une prestation présentielle.' });
-    }
-    if (!dateService || !lieu) {
-      return res.status(400).json({ erreur: 'Date ou lieu manquant.' });
-    }
+    
+    // Remplace l'ancienne validation
+if (!req.body.dateAConvenir) {
+  if (!dateService || dateService.length === 0) {
+    return res.status(400).json({ erreur: 'Date manquante.' });
+  }
+}
+// Le lieu peut être facultatif si distanciel ou date à convenir
+// (à adapter selon ta logique)
+if (!lieu || lieu.trim() === "") {
+  // Option 1 : autoriser lieu vide si distanciel
+  if (typePrestation !== 'En ligne' && !req.body.dateAConvenir) {
+    return res.status(400).json({ erreur: 'Lieu manquant.' });
+  }
+  // Option 2 : utiliser une valeur par défaut
+  lieu = "À convenir";
+}
     if (!createur || createur === "null") {
       return res.status(401).json({ erreur: "Utilisateur non authentifié (createur manquant)." });
     }
