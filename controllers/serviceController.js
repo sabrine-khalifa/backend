@@ -231,13 +231,7 @@ exports.updateService = async (req, res) => {
     if (creditsProposes && creditsProposes < 1) {
       return res.status(400).json({ erreur: 'Crédits invalides.' });
     }
-    if (typePrestation === 'Présentiel' && prix && prix <= 0) {
-      return res.status(400).json({ erreur: 'Prix requis pour une prestation présentielle.' });
-    }
-    if (typePrestation && (typePrestation === 'presentiel' || typePrestation === 'hybride') && !lieu) {
-      return res.status(400).json({ erreur: 'Lieu requis pour ce type de prestation.' });
-    }
-
+    
     // Gérer les catégories
     let categoriesArray = categories;
     if (categories && !Array.isArray(categories)) {
