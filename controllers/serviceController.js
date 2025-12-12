@@ -222,11 +222,20 @@ exports.updateService = async (req, res) => {
       return res.status(400).json({ erreur: 'Description invalide.' });
     }
    // Validation crédits
-let prix = Number(creditsProposes);
+// --- VALIDATION ET TRAITEMENT DU PRIX ---
+let prix;
 
-if (!creditsProposes || isNaN(prix) || prix < 1) {
-  return res.status(400).json({ erreur: "Crédits invalides." });
+if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes !== "") {
+  prix = Number(creditsProposes);
+
+  if (isNaN(prix) || prix < 1) {
+    return res.status(400).json({ erreur: "Crédits invalides." });
+  }
+} else {
+  // si pas envoyé → garder le prix existant
+  prix = service.creditsProposes;
 }
+
 
     // Gérer les catégories
     let categoriesArray = categories;
@@ -245,7 +254,7 @@ if (!creditsProposes || isNaN(prix) || prix < 1) {
     service.description = description || service.description;
     service.categories = categoriesArray || service.categories;
     service.typePrestation = typePrestation || service.typePrestation;
-    service.creditsProposes = prix || service.creditsProposes;
+    service.creditsProposes = prix;
     service.images = images;
     service.dateService = dateService || service.dateService;
     service.heure = heure || service.heure;
