@@ -221,10 +221,13 @@ exports.updateService = async (req, res) => {
     if (description && description.length < 10) {
       return res.status(400).json({ erreur: 'Description invalide.' });
     }
-    if (creditsProposes && creditsProposes < 1) {
-      return res.status(400).json({ erreur: 'Crédits invalides.' });
-    }
-    
+   // Validation crédits
+let prix = Number(creditsProposes);
+
+if (!creditsProposes || isNaN(prix) || prix < 1) {
+  return res.status(400).json({ erreur: "Crédits invalides." });
+}
+
     // Gérer les catégories
     let categoriesArray = categories;
     if (categories && !Array.isArray(categories)) {
@@ -242,7 +245,7 @@ exports.updateService = async (req, res) => {
     service.description = description || service.description;
     service.categories = categoriesArray || service.categories;
     service.typePrestation = typePrestation || service.typePrestation;
-    service.creditsProposes = creditsProposes || service.creditsProposes;
+    service.creditsProposes = prix || service.creditsProposes;
     service.images = images;
     service.dateService = dateService || service.dateService;
     service.heure = heure || service.heure;
