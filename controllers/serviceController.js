@@ -36,10 +36,10 @@ exports.createService = async (req, res) => {
     if (!description || description.length < 10) {
       return res.status(400).json({ erreur: 'Description invalide.' });
     }
-    if (!creditsProposes || creditsProposes < 1) {
-      return res.status(400).json({ erreur: 'Crédits invalides.' });
-    }
-    
+    if (creditsProposes === undefined || creditsProposes === null || Number(creditsProposes) < 1) {
+    return res.status(400).json({ erreur: 'Crédits invalides.' });
+}
+
     // Remplace l'ancienne validation
 if (!req.body.dateAConvenir) {
   if (!dateService || dateService.length === 0) {
