@@ -48,14 +48,10 @@ if (!req.body.dateAConvenir) {
 }
 // Le lieu peut être facultatif si distanciel ou date à convenir
 // (à adapter selon ta logique)
-if (!lieu || lieu.trim() === "") {
-  // Option 1 : autoriser lieu vide si distanciel
-  if (typePrestation !== 'En ligne' && !req.body.dateAConvenir) {
-    return res.status(400).json({ erreur: 'Lieu manquant.' });
-  }
-  // Option 2 : utiliser une valeur par défaut
-  lieu = "À convenir";
+if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
+  return res.status(400).json({ erreur: 'Lieu manquant pour une prestation présentielle.' });
 }
+
     if (!createur || createur === "null") {
       return res.status(401).json({ erreur: "Utilisateur non authentifié (createur manquant)." });
     }
