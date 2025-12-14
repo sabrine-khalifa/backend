@@ -306,6 +306,9 @@ if (dateService !== undefined) {
 
   } catch (err) {
     console.error("❌ Erreur mise à jour service :", err);
+      console.error("DETAILS:", err.message, err.errors);
+
+    
     res.status(500).json({ erreur: "Erreur serveur lors de la mise à jour." });
   }
 };
