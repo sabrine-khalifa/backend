@@ -274,7 +274,16 @@ if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes
     service.typePrestation = typePrestation || service.typePrestation;
     service.creditsProposes = prix;
     service.images = images;
-    service.dateService = dateService || service.dateService;
+    // 🔹 DATE
+if (dateService !== undefined) {
+  const parsedDates = Array.isArray(dateService)
+    ? dateService.map(d => new Date(d))
+    : [new Date(dateService)];
+
+  service.dateService = parsedDates;
+}
+
+
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
     service.typeCours = typeCours || service.typeCours;
@@ -300,3 +309,6 @@ if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes
     res.status(500).json({ erreur: "Erreur serveur lors de la mise à jour." });
   }
 };
+
+
+

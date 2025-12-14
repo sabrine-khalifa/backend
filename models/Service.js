@@ -7,7 +7,7 @@ const serviceSchema = new mongoose.Schema({
   typePrestation: { type: String, enum: ['Présentiel', 'En ligne'], required: true },
   images:  [{ type: String }],
   lieu: { type: String },
-  dateService: { type: Date },
+  dateService: [{ type: Date }],
   heure: { type: String }, 
   duree: { type: String }, 
   typeCours: { type: String, enum: ['Individuel', 'Collectif', 'Groupe'] },
