@@ -309,7 +309,7 @@ if (dateService !== undefined) {
       console.error("DETAILS:", err.message, err.errors);
 
     
-    res.status(500).json({ erreur: "Erreur serveur lors de la mise à jour." });
+  res.status(500).json({ erreur: "Erreur serveur lors de la mise à jour.", details: err.message });
   }
 };
 
