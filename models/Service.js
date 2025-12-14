@@ -11,7 +11,7 @@ const serviceSchema = new mongoose.Schema({
   heure: { type: String }, 
   duree: { type: String }, 
   typeCours: { type: String, enum: ['Individuel', 'Collectif', 'Groupe'] },
-  publicCible: { type: String, enum: ['Débutants', 'Professionnels', 'Tous niveaux'] },
+  publicCible: { type: String },
   prerequis: { type: String, default: "Aucun prérequis" },
   materiel: { type: String, default: "Aucun matériel requis" },
   accessiblePMR: { type: Boolean, default: false },
