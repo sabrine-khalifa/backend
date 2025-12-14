@@ -295,6 +295,8 @@ if (dateService !== undefined) {
     service.lieu = lieu || service.lieu;
     service.nombrePlaces = nombrePlaces || service.nombrePlaces;
 
+    console.log("Service avant save :", service.toObject());
+
     const updatedService = await service.save();
 
     console.log("✅ Service mis à jour :", updatedService);

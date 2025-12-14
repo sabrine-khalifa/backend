@@ -145,6 +145,12 @@ router.get("/serv/user/:userId", async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, upload.array('image'), serviceController.updateService);
+router.put(
+  '/:id',
+  authMiddleware,
+  upload.array('image'),  // max 5 images
+  uploadToCloudinary,
+  serviceController.updateService
+);
 
 module.exports = router;
