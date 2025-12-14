@@ -8,10 +8,12 @@ const serviceSchema = new mongoose.Schema({
   images:  [{ type: String }],
   lieu: { type: String },
   dateService: { type: Date },
-  heure: { type: String }, // format "HH:mm"
-  duree: { type: String }, // ex: "1h30"
+  heure: { type: String }, 
+  duree: { type: String }, 
   typeCours: { type: String, enum: ['Individuel', 'Collectif', 'Groupe'] },
   publicCible: { type: String, enum: ['Débutants', 'Professionnels', 'Tous niveaux'] },
+  prerequis: { type: String, default: "Aucun prérequis" },
+  materiel: { type: String, default: "Aucun matériel requis" },
   accessiblePMR: { type: Boolean, default: false },
 
   creditsProposes: { type: Number, required: true, min: 1 },

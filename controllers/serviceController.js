@@ -23,9 +23,23 @@ exports.createService = async (req, res) => {
     console.log("BODY:", req.body);
     console.log("CLOUDINARY URLs:", req.cloudinaryUrls); // ✅ Clé du succès
     const {
-   titre, description, categories, typePrestation, creditsProposes, dateService, heure, duree, typeCours, publicCible, accessiblePMR,
-      lieu, nombrePlaces
-    } = req.body;
+  titre,
+  description,
+  categories,
+  typePrestation,
+  creditsProposes,
+  dateService,
+  heure,
+  duree,
+  typeCours,
+  publicCible,
+  prerequis,      // ✅ AJOUT
+  materiel,       // ✅ AJOUT
+  accessiblePMR,
+  lieu,
+  nombrePlaces
+} = req.body;
+
 
     const createur = req.userId;
 
@@ -48,7 +62,9 @@ if (!req.body.dateAConvenir) {
 }
 // Le lieu peut être facultatif si distanciel ou date à convenir
 // (à adapter selon ta logique)
-
+if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
+  return res.status(400).json({ erreur: 'Lieu manquant pour une prestation présentielle.' });
+}
 
     if (!createur || createur === "null") {
       return res.status(401).json({ erreur: "Utilisateur non authentifié (createur manquant)." });
@@ -74,6 +90,8 @@ if (!req.body.dateAConvenir) {
       duree,
       typeCours,
       publicCible,
+       prerequis,       // ✅
+       materiel,  
       accessiblePMR,
       lieu,
       nombrePlaces,
@@ -207,6 +225,8 @@ exports.updateService = async (req, res) => {
       duree,
       typeCours,
       publicCible,
+      prerequis,     
+      materiel,  
       accessiblePMR,
       lieu,
       nombrePlaces,
@@ -259,6 +279,9 @@ if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes
     service.duree = duree || service.duree;
     service.typeCours = typeCours || service.typeCours;
     service.publicCible = publicCible || service.publicCible;
+    service.prerequis = prerequis !== undefined ? prerequis : service.prerequis;
+    service.materiel  = materiel  !== undefined ? materiel  : service.materiel;
+
     service.accessiblePMR = accessiblePMR !== undefined ? accessiblePMR : service.accessiblePMR;
     service.lieu = lieu || service.lieu;
     service.nombrePlaces = nombrePlaces || service.nombrePlaces;
