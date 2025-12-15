@@ -49,9 +49,16 @@ const uploadToCloudinary = async (req, res, next) => {
 
 // ✅ Contrôleurs
 const { 
-  register, login, refreshToken, updateUser, 
-  forgotPassword, resetPassword, getUserById 
+  register,
+  login,
+  refreshToken,
+  updateUser,
+  forgotPassword,
+  resetPassword,
+  getUserById,
+  verifyEmail          // ✅ AJOUT
 } = require('../controllers/authController');
+
 
 const verifyToken = require('../middlewares/auth');
 
@@ -64,6 +71,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.put('/:id', verifyToken, upload.single('photo'), uploadToCloudinary, updateUser);
 router.get("/:id", getUserById);
-router.get('/verify-email/:token', authController.verifyEmail);
+router.get('/verify-email/:token', verifyEmail);
 
 module.exports = router;
