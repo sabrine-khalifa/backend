@@ -292,16 +292,20 @@ if (dateService !== undefined) {
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
 
-  if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
+ 
+    const validTypesCours = ['Individuel', 'Collectif', 'Groupe'];
+
+if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
   if (!validTypesCours.includes(typeCours)) {
     return res.status(400).json({ erreur: `typeCours invalide. Valeurs autorisées : ${validTypesCours.join(", ")}` });
   }
   service.typeCours = typeCours;
 }
-
-if (publicCible !== undefined && publicCible !== null && publicCible !== "") {
+// publicCible normal, juste assigner s'il existe
+if (publicCible !== undefined && publicCible !== null) {
   service.publicCible = publicCible;
 }
+
 
     service.prerequis = prerequis !== undefined ? prerequis : service.prerequis;
     service.materiel  = materiel  !== undefined ? materiel  : service.materiel;
