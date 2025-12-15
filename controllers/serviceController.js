@@ -300,9 +300,10 @@ if (dateService !== undefined) {
     }
   }
 
-  if (parsedDates.length === 0 && !req.body.dateAConvenir) {
-    return res.status(400).json({ erreur: "Dates invalides ou manquantes." });
-  }
+ const dateAConvenir = req.body.dateAConvenir === "true";
+if (parsedDates.length === 0 && !dateAConvenir) {
+  return res.status(400).json({ erreur: "Dates invalides ou manquantes." });
+}
 
   service.dateService = parsedDates;
 }
