@@ -291,8 +291,14 @@ if (dateService !== undefined) {
 
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
-    service.typeCours = typeCours || service.typeCours;
-    service.publicCible = publicCible || service.publicCible;
+    if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
+  service.typeCours = typeCours;
+}
+
+if (publicCible !== undefined && publicCible !== null && publicCible !== "") {
+  service.publicCible = publicCible;
+}
+
     service.prerequis = prerequis !== undefined ? prerequis : service.prerequis;
     service.materiel  = materiel  !== undefined ? materiel  : service.materiel;
 
