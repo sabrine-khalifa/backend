@@ -100,6 +100,11 @@ if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
 
     console.log("BODY:", req.body);
     console.log("FILES:", req.files);
+    
+    
+await service.validate();
+console.log("✅ Validation OK");
+
 
     const saved = await newService.save();
     res.status(201).json({ message: 'Service créé avec succès.', service: saved });
@@ -293,7 +298,10 @@ if (dateService !== undefined) {
 
     service.accessiblePMR = accessiblePMR !== undefined ? accessiblePMR : service.accessiblePMR;
     service.lieu = lieu || service.lieu;
-    service.nombrePlaces = nombrePlaces || service.nombrePlaces;
+
+    if (nombrePlaces !== undefined) {
+  service.nombrePlaces = Number(nombrePlaces);
+}
 
     console.log("Service avant save :", service.toObject());
 
