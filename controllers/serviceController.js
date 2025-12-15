@@ -307,6 +307,7 @@ if (publicCible !== undefined && publicCible !== null) {
 }
 
 
+
     service.prerequis = prerequis !== undefined ? prerequis : service.prerequis;
     service.materiel  = materiel  !== undefined ? materiel  : service.materiel;
 
