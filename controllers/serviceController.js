@@ -302,10 +302,9 @@ if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
   service.typeCours = typeCours;
 }
 // publicCible normal, juste assigner s'il existe
-if ("publicCible" in req.body) {
-  service.publicCible = publicCible === null || publicCible === undefined ? "" : String(publicCible);
+if (publicCible !== undefined && publicCible !== null) {
+  service.publicCible = publicCible;
 }
-
 
 
 
