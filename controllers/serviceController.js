@@ -202,6 +202,8 @@ exports.updateService = async (req, res) => {
     const { id } = req.params;
     const userId = req.userId;
 
+    console.log("dateService reçue :", req.body.dateService);
+    console.log("Tout le body reçu :", req.body);
     // Vérifier si l'utilisateur est authentifié
     if (!userId) {
       return res.status(401).json({ erreur: "Utilisateur non authentifié." });
@@ -280,10 +282,27 @@ if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes
     service.creditsProposes = prix;
     service.images = images;
     // 🔹 DATE
+// 🔹 DATE
 if (dateService !== undefined) {
-  const parsedDates = Array.isArray(dateService)
-    ? dateService.map(d => new Date(d))
-    : [new Date(dateService)];
+  let parsedDates = [];
+
+  if (Array.isArray(dateService)) {
+    parsedDates = dateService
+      .map(d => {
+        const date = new Date(d);
+        return isNaN(date.getTime()) ? null : date; // filtre les dates invalides
+      })
+      .filter(Boolean); // retire les null
+  } else {
+    const date = new Date(dateService);
+    if (!isNaN(date.getTime())) {
+      parsedDates = [date];
+    }
+  }
+
+  if (parsedDates.length === 0 && !req.body.dateAConvenir) {
+    return res.status(400).json({ erreur: "Dates invalides ou manquantes." });
+  }
 
   service.dateService = parsedDates;
 }
