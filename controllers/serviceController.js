@@ -291,7 +291,11 @@ if (dateService !== undefined) {
 
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
-    if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
+
+  if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
+  if (!validTypesCours.includes(typeCours)) {
+    return res.status(400).json({ erreur: `typeCours invalide. Valeurs autorisées : ${validTypesCours.join(", ")}` });
+  }
   service.typeCours = typeCours;
 }
 
