@@ -211,6 +211,7 @@ exports.getServicesDisponiblesByCreator = async (req, res) => {
 };
 
 // 🔹 Mise à jour d’un service
+// 🔹 Mise à jour d'un service
 exports.updateService = async (req, res) => {
   try {
     const { id } = req.params;
@@ -218,6 +219,7 @@ exports.updateService = async (req, res) => {
 
     console.log("dateService reçue :", req.body.dateService);
     console.log("Tout le body reçu :", req.body);
+
     // Vérifier si l'utilisateur est authentifié
     if (!userId) {
       return res.status(401).json({ erreur: "Utilisateur non authentifié." });
@@ -228,21 +230,6 @@ exports.updateService = async (req, res) => {
     if (!service) {
       return res.status(404).json({ erreur: "Service non trouvé." });
     }
-
-    if (req.body.dateService !== undefined) {
-  const rawDates = Array.isArray(req.body.dateService)
-    ? req.body.dateService
-    : [req.body.dateService];
-
-  const parsedDates = rawDates
-    .map(d => {
-      const date = new Date(d);
-      return isNaN(date.getTime()) ? null : date;
-    })
-    .filter(Boolean);
-
-  service.dateService = parsedDates;
-}
 
     // Vérifier que l'utilisateur est bien le créateur
     if (service.createur.toString() !== userId.toString()) {
@@ -277,22 +264,19 @@ exports.updateService = async (req, res) => {
     if (description && description.length < 10) {
       return res.status(400).json({ erreur: "Description invalide." });
     }
-    // Validation crédits
+
     // --- VALIDATION ET TRAITEMENT DU PRIX ---
     let prix;
-
     if (
       creditsProposes !== undefined &&
       creditsProposes !== null &&
       creditsProposes !== ""
     ) {
       prix = Number(creditsProposes);
-
       if (isNaN(prix) || prix < 1) {
         return res.status(400).json({ erreur: "Crédits invalides." });
       }
     } else {
-      // si pas envoyé → garder le prix existant
       prix = service.creditsProposes;
     }
 
@@ -303,64 +287,45 @@ exports.updateService = async (req, res) => {
     }
 
     // Gérer les images — seulement si de nouvelles sont uploadées
-    let images = service.images; // par défaut, on garde les anciennes
+    let images = service.images;
     if (req.files && req.files.length > 0) {
-      images = req.files.map((file) => file.path); // ✅ Utilise file.path
+      images = req.files.map((file) => file.path);
     }
 
-    // Mettre à jour le service
+    // --- MISE À JOUR DES CHAMPS ---
     service.titre = titre || service.titre;
     service.description = description || service.description;
     service.categories = categoriesArray || service.categories;
     service.typePrestation = typePrestation || service.typePrestation;
     service.creditsProposes = prix;
     service.images = images;
-    // 🔹 DATE
-    // 🔹 DATE
-    
-    // 🔹 DATE
-let parsedDates = []; // déclaration unique
 
-if (req.body.dateService !== undefined) {
-  const rawDates = Array.isArray(req.body.dateService)
-    ? req.body.dateService
-    : [req.body.dateService];
+    // 🔹 DATE - Ne modifier que si dateService est envoyé
+    if (dateService !== undefined) {
+      const rawDates = Array.isArray(dateService) ? dateService : [dateService];
+      const parsedDates = rawDates
+        .map((d) => {
+          const date = new Date(d);
+          return isNaN(date.getTime()) ? null : date;
+        })
+        .filter(Boolean);
+      service.dateService = parsedDates;
+    }
+    // Si dateService n'est pas envoyé, on garde l'existant
 
-  parsedDates = rawDates
-    .map(d => {
-      const date = new Date(d);
-      return isNaN(date.getTime()) ? null : date;
-    })
-    .filter(Boolean);
-}
-
-// Assignation au service
-service.dateService = parsedDates;
-
-  
-
-
-
-
-
-    
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
 
-    const validTypesCours = ["Individuel", "Collectif", "Groupe"];
-
     if (typeCours !== undefined && typeCours !== "") {
-  service.typeCours = typeCours;
-}
+      service.typeCours = typeCours;
+    }
 
-    // publicCible normal, juste assigner s'il existe
     if (publicCible !== undefined && publicCible !== null) {
       service.publicCible = publicCible;
     }
 
     service.prerequis = prerequis !== undefined ? prerequis : service.prerequis;
     service.materiel = materiel !== undefined ? materiel : service.materiel;
-
     service.accessiblePMR =
       accessiblePMR !== undefined ? accessiblePMR : service.accessiblePMR;
     service.lieu = lieu || service.lieu;
@@ -386,6 +351,6 @@ service.dateService = parsedDates;
     res.status(500).json({
       erreur: "Erreur serveur lors de la mise à jour.",
       details: err.message,
-    });
-  }
+    });
+  }
 };
