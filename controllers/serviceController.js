@@ -64,16 +64,12 @@ exports.createService = async (req, res) => {
     // Remplace l'ancienne validation
     if (!req.body.dateAConvenir) {
       if (!dateService || dateService.length === 0) {
-        return res.status(400).json({ erreur: "Date manquante." });
+       // return res.status(400).json({ erreur: "Date manquante." });
       }
     }
     // Le lieu peut être facultatif si distanciel ou date à convenir
     // (à adapter selon ta logique)
-    if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
-      return res
-        .status(400)
-        .json({ erreur: "Lieu manquant pour une prestation présentielle." });
-    }
+   
 
     if (!createur || createur === "null") {
       return res
@@ -316,33 +312,33 @@ exports.updateService = async (req, res) => {
     service.images = images;
     // 🔹 DATE
     // 🔹 DATE
-    if (dateService !== undefined) {
-      let parsedDates = [];
+    
+    // 🔹 DATE
+let parsedDates = []; // déclaration unique
 
-      if (Array.isArray(dateService)) {
-        parsedDates = dateService
-          .map((d) => {
-            const date = new Date(d);
-            return isNaN(date.getTime()) ? null : date; // filtre les dates invalides
-          })
-          .filter(Boolean); // retire les null
-      } else {
-        const date = new Date(dateService);
-        if (!isNaN(date.getTime())) {
-          parsedDates = [date];
-        }
-      }
+if (req.body.dateService !== undefined) {
+  const rawDates = Array.isArray(req.body.dateService)
+    ? req.body.dateService
+    : [req.body.dateService];
 
-      const dateAConvenir = req.body.dateAConvenir === "true";
-      if (parsedDates.length === 0 && !dateAConvenir) {
-        return res
-          .status(400)
-          .json({ erreur: "Dates invalides ou manquantes." });
-      }
+  parsedDates = rawDates
+    .map(d => {
+      const date = new Date(d);
+      return isNaN(date.getTime()) ? null : date;
+    })
+    .filter(Boolean);
+}
 
-      service.dateService = parsedDates;
-    }
+// Assignation au service
+service.dateService = parsedDates;
 
+  
+
+
+
+
+
+    
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
 
