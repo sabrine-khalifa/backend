@@ -46,30 +46,35 @@ exports.createService = async (req, res) => {
 
     const createur = req.userId;
 
-    // --- VALIDATIONS ---
-    if (!titre || titre.length < 3) {
-      return res.status(400).json({ erreur: "Titre invalide." });
-    }
-    if (!description || description.length < 10) {
-      return res.status(400).json({ erreur: "Description invalide." });
-    }
-    if (
-      creditsProposes === undefined ||
-      creditsProposes === null ||
-      Number(creditsProposes) < 1
-    ) {
-      return res.status(400).json({ erreur: "Crédits invalides." });
-    }
+   // --- VALIDATIONS ---
+if (!titre || titre.length < 3) {
+  return res.status(400).json({ erreur: "Titre invalide." });
+}
+if (!description || description.length < 10) {
+  return res.status(400).json({ erreur: "Description invalide." });
+}
+if (
+  creditsProposes === undefined ||
+  creditsProposes === null ||
+  Number(creditsProposes) < 1
+) {
+  return res.status(400).json({ erreur: "Crédits invalides." });
+}
 
-    // Remplace l'ancienne validation
-    if (!req.body.dateAConvenir) {
-      if (!dateService || dateService.length === 0) {
-       // return res.status(400).json({ erreur: "Date manquante." });
-      }
-    }
-    // Le lieu peut être facultatif si distanciel ou date à convenir
-    // (à adapter selon ta logique)
+const dateAConvenir = req.body.dateAConvenir === "true" || req.body.dateAConvenir === true;
+
+// Validation de la date
+if (!dateAConvenir) {
+  if (!dateService || !Array.isArray(dateService) || dateService.length === 0 || dateService.every(d => !d)) {
+    return res.status(400).json({ erreur: "Date manquante." });
+  }
+}
+
+
+
    
+
+
 
     if (!createur || createur === "null") {
       return res
