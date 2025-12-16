@@ -228,6 +228,21 @@ exports.updateService = async (req, res) => {
       return res.status(404).json({ erreur: "Service non trouvé." });
     }
 
+    if (req.body.dateService !== undefined) {
+  const rawDates = Array.isArray(req.body.dateService)
+    ? req.body.dateService
+    : [req.body.dateService];
+
+  const parsedDates = rawDates
+    .map(d => {
+      const date = new Date(d);
+      return isNaN(date.getTime()) ? null : date;
+    })
+    .filter(Boolean);
+
+  service.dateService = parsedDates;
+}
+
     // Vérifier que l'utilisateur est bien le créateur
     if (service.createur.toString() !== userId.toString()) {
       return res.status(403).json({
@@ -333,16 +348,10 @@ exports.updateService = async (req, res) => {
 
     const validTypesCours = ["Individuel", "Collectif", "Groupe"];
 
-    if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
-      if (!validTypesCours.includes(typeCours)) {
-        return res.status(400).json({
-          erreur: `typeCours invalide. Valeurs autorisées : ${validTypesCours.join(
-            ", "
-          )}`,
-        });
-      }
-      service.typeCours = typeCours;
-    }
+    if (typeCours !== undefined && typeCours !== "") {
+  service.typeCours = typeCours;
+}
+
     // publicCible normal, juste assigner s'il existe
     if (publicCible !== undefined && publicCible !== null) {
       service.publicCible = publicCible;
