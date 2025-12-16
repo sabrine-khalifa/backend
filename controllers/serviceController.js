@@ -1,84 +1,95 @@
 const mongoose = require("mongoose"); // <-- AJOUT ICI
-const User = require('../models/user'); // chemin selon ton projet
+const User = require("../models/user"); // chemin selon ton projet
 const Reservation = require("../models/Reservation");
 
-const Service = require('../models/Service'); // 🔹 Import du modèle Service
+const Service = require("../models/Service"); // 🔹 Import du modèle Service
 
 // Récupérer tous les services
 exports.getServices = async (req, res) => {
   try {
-    const services = await Service.find()
-      .populate('createur', 'name prenom photo'); // optionnel : infos créateur
+    const services = await Service.find().populate(
+      "createur",
+      "name prenom photo"
+    ); // optionnel : infos créateur
     res.status(200).json(services);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erreur: 'Erreur serveur lors du chargement des services.' });
+    res
+      .status(500)
+      .json({ erreur: "Erreur serveur lors du chargement des services." });
   }
 };
 
 // Créer un nouveau service
 exports.createService = async (req, res) => {
   try {
-   console.log("🎯 Début createService");
+    console.log("🎯 Début createService");
     console.log("BODY:", req.body);
     console.log("CLOUDINARY URLs:", req.cloudinaryUrls); // ✅ Clé du succès
     const {
-  titre,
-  description,
-  categories,
-  typePrestation,
-  creditsProposes,
-  dateService,
-  heure,
-  duree,
-  typeCours,
-  publicCible,
-  prerequis,      // ✅ AJOUT
-  materiel,       // ✅ AJOUT
-  accessiblePMR,
-  lieu,
-  nombrePlaces
-} = req.body;
-
+      titre,
+      description,
+      categories,
+      typePrestation,
+      creditsProposes,
+      dateService,
+      heure,
+      duree,
+      typeCours,
+      publicCible,
+      prerequis, // ✅ AJOUT
+      materiel, // ✅ AJOUT
+      accessiblePMR,
+      lieu,
+      nombrePlaces,
+    } = req.body;
 
     const createur = req.userId;
 
     // --- VALIDATIONS ---
     if (!titre || titre.length < 3) {
-      return res.status(400).json({ erreur: 'Titre invalide.' });
+      return res.status(400).json({ erreur: "Titre invalide." });
     }
     if (!description || description.length < 10) {
-      return res.status(400).json({ erreur: 'Description invalide.' });
+      return res.status(400).json({ erreur: "Description invalide." });
     }
-    if (creditsProposes === undefined || creditsProposes === null || Number(creditsProposes) < 1) {
-    return res.status(400).json({ erreur: 'Crédits invalides.' });
-}
+    if (
+      creditsProposes === undefined ||
+      creditsProposes === null ||
+      Number(creditsProposes) < 1
+    ) {
+      return res.status(400).json({ erreur: "Crédits invalides." });
+    }
 
     // Remplace l'ancienne validation
-if (!req.body.dateAConvenir) {
-  if (!dateService || dateService.length === 0) {
-    return res.status(400).json({ erreur: 'Date manquante.' });
-  }
-}
-// Le lieu peut être facultatif si distanciel ou date à convenir
-// (à adapter selon ta logique)
-if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
-  return res.status(400).json({ erreur: 'Lieu manquant pour une prestation présentielle.' });
-}
+    if (!req.body.dateAConvenir) {
+      if (!dateService || dateService.length === 0) {
+        return res.status(400).json({ erreur: "Date manquante." });
+      }
+    }
+    // Le lieu peut être facultatif si distanciel ou date à convenir
+    // (à adapter selon ta logique)
+    if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
+      return res
+        .status(400)
+        .json({ erreur: "Lieu manquant pour une prestation présentielle." });
+    }
 
     if (!createur || createur === "null") {
-      return res.status(401).json({ erreur: "Utilisateur non authentifié (createur manquant)." });
+      return res
+        .status(401)
+        .json({ erreur: "Utilisateur non authentifié (createur manquant)." });
     }
 
     // 🔹 Récupération des images envoyées (si multiples)
     const images = req.cloudinaryUrls || [];
-    console.log("FILES:", req.files)
+    console.log("FILES:", req.files);
     // --- CRÉATION ---
-    const categoriesArray  = Array.isArray(req.body.categories)
-  ? req.body.categories
-  : [req.body.categories].filter(Boolean); // pour éviter undefined
+    const categoriesArray = Array.isArray(req.body.categories)
+      ? req.body.categories
+      : [req.body.categories].filter(Boolean); // pour éviter undefined
 
-      const newService = new Service({
+    const newService = new Service({
       titre,
       description,
       categories: categoriesArray,
@@ -90,8 +101,8 @@ if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
       duree,
       typeCours,
       publicCible,
-       prerequis,       // ✅
-       materiel,  
+      prerequis, // ✅
+      materiel,
       accessiblePMR,
       lieu,
       nombrePlaces,
@@ -100,24 +111,27 @@ if (typePrestation === "Présentiel" && (!lieu || lieu.trim() === "")) {
 
     console.log("BODY:", req.body);
     console.log("FILES:", req.files);
-    
-    
-await service.validate();
-console.log("✅ Validation OK");
 
+await newService.validate();
+
+    console.log("✅ Validation OK");
 
     const saved = await newService.save();
-    res.status(201).json({ message: 'Service créé avec succès.', service: saved });
-
+    res
+      .status(201)
+      .json({ message: "Service créé avec succès.", service: saved });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erreur: 'Erreur serveur.' });
+    res.status(500).json({ erreur: "Erreur serveur." });
   }
 };
 
 exports.getServiceById = async (req, res) => {
   try {
-    const service = await Service.findById(req.params.id).populate('createur', 'prenom name photo');
+    const service = await Service.findById(req.params.id).populate(
+      "createur",
+      "prenom name photo"
+    );
     if (!service) return res.status(404).json({ erreur: "Service non trouvé" });
     res.status(200).json(service);
   } catch (err) {
@@ -125,7 +139,6 @@ exports.getServiceById = async (req, res) => {
     res.status(500).json({ erreur: "Erreur serveur" });
   }
 };
-
 
 // Réservation d’un service
 exports.reserverService = async (req, res) => {
@@ -155,7 +168,7 @@ exports.reserverService = async (req, res) => {
     await createur.save();
     await service.save();
 
-      // Créer la réservation
+    // Créer la réservation
     const reservation = new Reservation({
       service: serviceId,
       utilisateur: userId,
@@ -178,11 +191,13 @@ exports.getServicesDisponiblesByCreator = async (req, res) => {
     const servicesDisponibles = [];
 
     for (const service of services) {
-      const nbReservees = await Reservation.countDocuments({ service: service._id });
+      const nbReservees = await Reservation.countDocuments({
+        service: service._id,
+      });
       if (service.nombrePlaces - nbReservees > 0) {
         servicesDisponibles.push({
           ...service.toObject(),
-          placesRestantes: service.nombrePlaces - nbReservees
+          placesRestantes: service.nombrePlaces - nbReservees,
         });
       }
     }
@@ -190,11 +205,9 @@ exports.getServicesDisponiblesByCreator = async (req, res) => {
     res.json(servicesDisponibles);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Erreur serveur' });
+    res.status(500).json({ msg: "Erreur serveur" });
   }
 };
-
-
 
 // 🔹 Mise à jour d’un service
 exports.updateService = async (req, res) => {
@@ -217,7 +230,9 @@ exports.updateService = async (req, res) => {
 
     // Vérifier que l'utilisateur est bien le créateur
     if (service.createur.toString() !== userId.toString()) {
-      return res.status(403).json({ erreur: "Accès refusé. Vous n'êtes pas le propriétaire de ce service." });
+      return res.status(403).json({
+        erreur: "Accès refusé. Vous n'êtes pas le propriétaire de ce service.",
+      });
     }
 
     // Récupérer les champs à mettre à jour
@@ -232,8 +247,8 @@ exports.updateService = async (req, res) => {
       duree,
       typeCours,
       publicCible,
-      prerequis,     
-      materiel,  
+      prerequis,
+      materiel,
       accessiblePMR,
       lieu,
       nombrePlaces,
@@ -241,26 +256,29 @@ exports.updateService = async (req, res) => {
 
     // --- VALIDATIONS ---
     if (titre && titre.length < 3) {
-      return res.status(400).json({ erreur: 'Titre invalide.' });
+      return res.status(400).json({ erreur: "Titre invalide." });
     }
     if (description && description.length < 10) {
-      return res.status(400).json({ erreur: 'Description invalide.' });
+      return res.status(400).json({ erreur: "Description invalide." });
     }
-   // Validation crédits
-// --- VALIDATION ET TRAITEMENT DU PRIX ---
-let prix;
+    // Validation crédits
+    // --- VALIDATION ET TRAITEMENT DU PRIX ---
+    let prix;
 
-if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes !== "") {
-  prix = Number(creditsProposes);
+    if (
+      creditsProposes !== undefined &&
+      creditsProposes !== null &&
+      creditsProposes !== ""
+    ) {
+      prix = Number(creditsProposes);
 
-  if (isNaN(prix) || prix < 1) {
-    return res.status(400).json({ erreur: "Crédits invalides." });
-  }
-} else {
-  // si pas envoyé → garder le prix existant
-  prix = service.creditsProposes;
-}
-
+      if (isNaN(prix) || prix < 1) {
+        return res.status(400).json({ erreur: "Crédits invalides." });
+      }
+    } else {
+      // si pas envoyé → garder le prix existant
+      prix = service.creditsProposes;
+    }
 
     // Gérer les catégories
     let categoriesArray = categories;
@@ -271,7 +289,7 @@ if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes
     // Gérer les images — seulement si de nouvelles sont uploadées
     let images = service.images; // par défaut, on garde les anciennes
     if (req.files && req.files.length > 0) {
-  images = req.files.map(file => file.path); // ✅ Utilise file.path
+      images = req.files.map((file) => file.path); // ✅ Utilise file.path
     }
 
     // Mettre à jour le service
@@ -282,61 +300,64 @@ if (creditsProposes !== undefined && creditsProposes !== null && creditsProposes
     service.creditsProposes = prix;
     service.images = images;
     // 🔹 DATE
-// 🔹 DATE
-if (dateService !== undefined) {
-  let parsedDates = [];
+    // 🔹 DATE
+    if (dateService !== undefined) {
+      let parsedDates = [];
 
-  if (Array.isArray(dateService)) {
-    parsedDates = dateService
-      .map(d => {
-        const date = new Date(d);
-        return isNaN(date.getTime()) ? null : date; // filtre les dates invalides
-      })
-      .filter(Boolean); // retire les null
-  } else {
-    const date = new Date(dateService);
-    if (!isNaN(date.getTime())) {
-      parsedDates = [date];
+      if (Array.isArray(dateService)) {
+        parsedDates = dateService
+          .map((d) => {
+            const date = new Date(d);
+            return isNaN(date.getTime()) ? null : date; // filtre les dates invalides
+          })
+          .filter(Boolean); // retire les null
+      } else {
+        const date = new Date(dateService);
+        if (!isNaN(date.getTime())) {
+          parsedDates = [date];
+        }
+      }
+
+      const dateAConvenir = req.body.dateAConvenir === "true";
+      if (parsedDates.length === 0 && !dateAConvenir) {
+        return res
+          .status(400)
+          .json({ erreur: "Dates invalides ou manquantes." });
+      }
+
+      service.dateService = parsedDates;
     }
-  }
-
- const dateAConvenir = req.body.dateAConvenir === "true";
-if (parsedDates.length === 0 && !dateAConvenir) {
-  return res.status(400).json({ erreur: "Dates invalides ou manquantes." });
-}
-
-  service.dateService = parsedDates;
-}
-
 
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
 
- 
-    const validTypesCours = ['Individuel', 'Collectif', 'Groupe'];
+    const validTypesCours = ["Individuel", "Collectif", "Groupe"];
 
-if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
-  if (!validTypesCours.includes(typeCours)) {
-    return res.status(400).json({ erreur: `typeCours invalide. Valeurs autorisées : ${validTypesCours.join(", ")}` });
-  }
-  service.typeCours = typeCours;
-}
-// publicCible normal, juste assigner s'il existe
-if (publicCible !== undefined && publicCible !== null) {
-  service.publicCible = publicCible;
-}
-
-
+    if (typeCours !== undefined && typeCours !== null && typeCours !== "") {
+      if (!validTypesCours.includes(typeCours)) {
+        return res.status(400).json({
+          erreur: `typeCours invalide. Valeurs autorisées : ${validTypesCours.join(
+            ", "
+          )}`,
+        });
+      }
+      service.typeCours = typeCours;
+    }
+    // publicCible normal, juste assigner s'il existe
+    if (publicCible !== undefined && publicCible !== null) {
+      service.publicCible = publicCible;
+    }
 
     service.prerequis = prerequis !== undefined ? prerequis : service.prerequis;
-    service.materiel  = materiel  !== undefined ? materiel  : service.materiel;
+    service.materiel = materiel !== undefined ? materiel : service.materiel;
 
-    service.accessiblePMR = accessiblePMR !== undefined ? accessiblePMR : service.accessiblePMR;
+    service.accessiblePMR =
+      accessiblePMR !== undefined ? accessiblePMR : service.accessiblePMR;
     service.lieu = lieu || service.lieu;
 
     if (nombrePlaces !== undefined) {
-  service.nombrePlaces = Number(nombrePlaces);
-}
+      service.nombrePlaces = Number(nombrePlaces);
+    }
 
     console.log("Service avant save :", service.toObject());
 
@@ -348,15 +369,13 @@ if (publicCible !== undefined && publicCible !== null) {
       message: "Service mis à jour avec succès.",
       service: updatedService,
     });
-
   } catch (err) {
     console.error("❌ Erreur mise à jour service :", err);
-      console.error("DETAILS:", err.message, err.errors);
+    console.error("DETAILS:", err.message, err.errors);
 
-    
-  res.status(500).json({ erreur: "Erreur serveur lors de la mise à jour.", details: err.message });
+    res.status(500).json({
+      erreur: "Erreur serveur lors de la mise à jour.",
+      details: err.message,
+    });
   }
 };
-
-
-
