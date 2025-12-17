@@ -24,6 +24,7 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
     const newUser = await User.create({
       name,
@@ -32,24 +33,19 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role: role || 'particulier',
       credits: 100,
-      isEmailVerified: false
+      isEmailVerified: false,
+      emailVerificationToken,
+      emailVerificationExpires: Date.now() + 3600000, // 1h
     });
 
-    // Token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    newUser.emailVerificationToken = emailVerificationToken;
-    newUser.emailVerificationExpires = Date.now() + 3600000;
-    await newUser.save();
-
-    // ✅ RÉPONSE IMMÉDIATE AU FRONT
+    // ✅ Répond immédiatement → frontend reçoit le msg
     res.status(201).json({
       msg: "Inscription réussie ! Veuillez vérifier votre e-mail."
     });
 
-    // 🔁 EMAIL EN ARRIÈRE-PLAN (NE BLOQUE PLUS)
+    // 🔁 Essaie d'envoyer l'email en arrière-plan (peut échouer sur Render)
     try {
       const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${emailVerificationToken}`;
-
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT),
@@ -64,24 +60,20 @@ exports.register = async (req, res) => {
         from: `"OpenUp" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Confirmez votre adresse email",
-        html: `
-          <p>Bonjour ${prenom || name},</p>
-          <p>Merci pour votre inscription sur <b>OpenUp</b>.</p>
-          <a href="${verificationLink}">Confirmer mon email</a>
-        `,
+        html: `<p>Bonjour ${prenom || name},<br/>Cliquez ici pour confirmer : <a href="${verificationLink}">Confirmer</a></p>`,
       });
-
-      console.log("📧 Email envoyé à", email);
     } catch (mailErr) {
-      console.error("⚠️ Email non envoyé :", mailErr.message);
+      console.error("📧 Échec envoi email (non bloquant) :", mailErr.message);
+      // Tu peux logguer dans une DB ou un outil comme Sentry si tu veux
     }
-
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Erreur serveur" });
+    console.error("💥 Erreur inscription :", err);
+    // Seulement si création utilisateur échoue (ex: DB down)
+    if (!res.headersSent) {
+      res.status(500).json({ msg: "Erreur serveur" });
+    }
   }
 };
-
 
 
 exports.verifyEmail = async (req, res) => {
