@@ -110,10 +110,12 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "Utilisateur introuvable" });
 
+
     // 🔒 Vérification : e-mail confirmé ?
-    if (!user.isEmailVerified) {
-      return res.status(400).json({ msg: "Veuillez confirmer votre e-mail avant de vous connecter." });
-    }
+
+    //if (!user.isEmailVerified) {
+      //return res.status(400).json({ msg: "Veuillez confirmer votre e-mail avant de vous connecter." });
+    //}
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: "Identifiants invalides" });
