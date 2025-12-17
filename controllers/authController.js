@@ -11,6 +11,9 @@ const User = require("../models/user");
 // ==========================
 // controllers/authController.js
 // controllers/authController.js
+// ==========================
+// REGISTER
+// ==========================
 exports.register = async (req, res) => {
   const { name, prenom, email, password, role } = req.body;
 
@@ -22,7 +25,6 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🔑 Ne sauvegarder que les champs de base + rôle
     const newUser = await User.create({
       name,
       prenom,
@@ -30,27 +32,52 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role: role || 'particulier',
       credits: 100,
-      // ✅ Tous les autres champs restent vides (undefined ou valeurs par défaut)
+      isEmailVerified: false
     });
 
-    // ✉️ Générer token de vérification (optionnel, mais recommandé)
+    // 🔑 Token de vérification
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     newUser.emailVerificationToken = emailVerificationToken;
     newUser.emailVerificationExpires = Date.now() + 3600000; // 1h
     await newUser.save();
 
-    // Envoyer e-mail de vérification (comme avant)
+    // ✉️ ENVOI EMAIL (MANQUANT)
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${emailVerificationToken}`;
-    // ... (code d'envoi d'e-mail inchangé)
 
-    res.status(201).json({ 
-      msg: "Inscription réussie ! Veuillez vérifier votre e-mail." 
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: { rejectUnauthorized: false },
     });
+
+    await transporter.sendMail({
+      from: `"OpenUp" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Confirmez votre adresse email",
+      html: `
+        <p>Bonjour ${prenom || name},</p>
+        <p>Merci pour votre inscription sur <b>OpenUp</b>.</p>
+        <p>Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :</p>
+        <a href="${verificationLink}">${verificationLink}</a>
+        <p>Ce lien est valide pendant 1 heure.</p>
+      `,
+    });
+
+    res.status(201).json({
+      msg: "Inscription réussie ! Veuillez vérifier votre e-mail."
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Erreur serveur" });
   }
 };
+
 
 exports.verifyEmail = async (req, res) => {
   try {
