@@ -25,9 +25,6 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🔑 Génère le token AVANT de sauvegarder
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-
     const newUser = await User.create({
       name,
       prenom,
@@ -35,24 +32,32 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role: role || 'particulier',
       credits: 100,
-      isEmailVerified: false,
-      emailVerificationToken,
-      emailVerificationExpires: Date.now() + 3600000, // 1h
+      isEmailVerified: false
     });
 
-    // ✉️ Tente d'envoyer l'email, mais NE PAS bloquer l'inscription
+    // Token
+    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    newUser.emailVerificationToken = emailVerificationToken;
+    newUser.emailVerificationExpires = Date.now() + 3600000;
+    await newUser.save();
+
+    // ✅ RÉPONSE IMMÉDIATE AU FRONT
+    res.status(201).json({
+      msg: "Inscription réussie ! Veuillez vérifier votre e-mail."
+    });
+
+    // 🔁 EMAIL EN ARRIÈRE-PLAN (NE BLOQUE PLUS)
     try {
       const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${emailVerificationToken}`;
 
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
+        port: Number(process.env.SMTP_PORT),
         secure: process.env.SMTP_SECURE === "true",
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
-        tls: { rejectUnauthorized: false },
       });
 
       await transporter.sendMail({
@@ -62,29 +67,21 @@ exports.register = async (req, res) => {
         html: `
           <p>Bonjour ${prenom || name},</p>
           <p>Merci pour votre inscription sur <b>OpenUp</b>.</p>
-          <p>Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :</p>
-          <a href="${verificationLink}" target="_blank">Confirmer mon email</a>
-          <p>Ce lien est valide pendant 1 heure.</p>
+          <a href="${verificationLink}">Confirmer mon email</a>
         `,
       });
 
-      console.log("✅ Email de vérification envoyé à", email);
-    } catch (emailError) {
-      // ⚠️ Log l'erreur, mais ne bloque PAS l'inscription
-      console.error("❌ Échec envoi email (non bloquant) :", emailError.message);
-      // Optionnel : sauvegarder dans une file d'attente ou un log dédié
+      console.log("📧 Email envoyé à", email);
+    } catch (mailErr) {
+      console.error("⚠️ Email non envoyé :", mailErr.message);
     }
 
-    // ✅ Toujours renvoyer le message de succès
-    return res.status(201).json({
-      msg: "Inscription réussie ! Veuillez vérifier votre e-mail."
-    });
-
   } catch (err) {
-    console.error("Erreur critique inscription :", err);
+    console.error(err);
     return res.status(500).json({ msg: "Erreur serveur" });
   }
 };
+
 
 
 exports.verifyEmail = async (req, res) => {
