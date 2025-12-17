@@ -90,6 +90,25 @@ if (!dateAConvenir) {
       ? req.body.categories
       : [req.body.categories].filter(Boolean); // pour éviter undefined
 
+
+      const normalizedPrerequis = Array.isArray(prerequis)
+  ? prerequis[0]
+  : prerequis;
+
+const normalizedMateriel = Array.isArray(materiel)
+  ? materiel[0]
+  : materiel;
+
+const normalizedAccessiblePMR = Array.isArray(accessiblePMR)
+  ? accessiblePMR[0] === "true"
+  : accessiblePMR === true || accessiblePMR === "true";
+
+
+  prerequis: normalizedPrerequis;
+materiel: normalizedMateriel;
+accessiblePMR: normalizedAccessiblePMR;
+
+
     const newService = new Service({
       titre,
       description,
@@ -324,10 +343,31 @@ exports.updateService = async (req, res) => {
       service.publicCible = publicCible;
     }
 
-    service.prerequis = prerequis !== undefined ? prerequis : service.prerequis;
-    service.materiel = materiel !== undefined ? materiel : service.materiel;
-    service.accessiblePMR =
-      accessiblePMR !== undefined ? accessiblePMR : service.accessiblePMR;
+   // 🔧 NORMALISATION DES CHAMPS PROBLÉMATIQUES
+
+// prerequis
+if (Array.isArray(prerequis)) {
+  service.prerequis = prerequis[0];
+} else if (prerequis !== undefined) {
+  service.prerequis = prerequis;
+}
+
+// materiel
+if (Array.isArray(materiel)) {
+  service.materiel = materiel[0];
+} else if (materiel !== undefined) {
+  service.materiel = materiel;
+}
+
+// accessiblePMR
+if (Array.isArray(accessiblePMR)) {
+  service.accessiblePMR = accessiblePMR[0] === "true";
+} else if (accessiblePMR !== undefined) {
+  service.accessiblePMR =
+    accessiblePMR === true || accessiblePMR === "true";
+}
+
+
     service.lieu = lieu || service.lieu;
 
     if (nombrePlaces !== undefined) {
