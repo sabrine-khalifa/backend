@@ -25,6 +25,9 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 🔑 Génère le token AVANT de sauvegarder
+    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+
     const newUser = await User.create({
       name,
       prenom,
@@ -32,49 +35,54 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role: role || 'particulier',
       credits: 100,
-      isEmailVerified: false
+      isEmailVerified: false,
+      emailVerificationToken,
+      emailVerificationExpires: Date.now() + 3600000, // 1h
     });
 
-    // 🔑 Token de vérification
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    newUser.emailVerificationToken = emailVerificationToken;
-    newUser.emailVerificationExpires = Date.now() + 3600000; // 1h
-    await newUser.save();
+    // ✉️ Tente d'envoyer l'email, mais NE PAS bloquer l'inscription
+    try {
+      const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${emailVerificationToken}`;
 
-    // ✉️ ENVOI EMAIL (MANQUANT)
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${emailVerificationToken}`;
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE === "true",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+        tls: { rejectUnauthorized: false },
+      });
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_SECURE === "true",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: { rejectUnauthorized: false },
-    });
+      await transporter.sendMail({
+        from: `"OpenUp" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Confirmez votre adresse email",
+        html: `
+          <p>Bonjour ${prenom || name},</p>
+          <p>Merci pour votre inscription sur <b>OpenUp</b>.</p>
+          <p>Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :</p>
+          <a href="${verificationLink}" target="_blank">Confirmer mon email</a>
+          <p>Ce lien est valide pendant 1 heure.</p>
+        `,
+      });
 
-    await transporter.sendMail({
-      from: `"OpenUp" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Confirmez votre adresse email",
-      html: `
-        <p>Bonjour ${prenom || name},</p>
-        <p>Merci pour votre inscription sur <b>OpenUp</b>.</p>
-        <p>Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :</p>
-        <a href="${verificationLink}">${verificationLink}</a>
-        <p>Ce lien est valide pendant 1 heure.</p>
-      `,
-    });
+      console.log("✅ Email de vérification envoyé à", email);
+    } catch (emailError) {
+      // ⚠️ Log l'erreur, mais ne bloque PAS l'inscription
+      console.error("❌ Échec envoi email (non bloquant) :", emailError.message);
+      // Optionnel : sauvegarder dans une file d'attente ou un log dédié
+    }
 
-    res.status(201).json({
+    // ✅ Toujours renvoyer le message de succès
+    return res.status(201).json({
       msg: "Inscription réussie ! Veuillez vérifier votre e-mail."
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Erreur serveur" });
+    console.error("Erreur critique inscription :", err);
+    return res.status(500).json({ msg: "Erreur serveur" });
   }
 };
 
