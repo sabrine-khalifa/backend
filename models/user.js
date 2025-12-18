@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
   typeCours: { type: String, enum: ['Groupe', 'Individuel', 'Collectif'] },
   publicCible: { type: String },
   liens: { type: String },
+  siteWeb: { type: String },
+instagram: { type: String },
+linkedin: { type: String },
+
 
   // Type de créateur (badge)
   typeCreateur: { 
