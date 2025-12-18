@@ -21,15 +21,15 @@ const userSchema = new mongoose.Schema({
 
   // Champs spécifiques au Créateur
   metier: { type: String },
-  domaine: { type: String },
+  domaine: { type: [String ]},
   langues: [{ type: String }], // tableau
   nationalites: { type: String },
   video: { type: String },
   description: { type: String },
   valeurs: { type: String },
-  lieuPrestation: { type: String, enum: ['', 'distanciel', 'presentiel', 'hybride'] },
+  lieuPrestation: { type: String, enum: ['En ligne', 'Présentiel'] },
   pmr: { type: Boolean, default: false },
-  typeCours: { type: String, enum: ['', 'individuel', 'collectif'] },
+  typeCours: { type: String, enum: ['Groupe', 'Individuel', 'Collectif'] },
   publicCible: { type: String },
   liens: { type: String },
 
