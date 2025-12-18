@@ -318,3 +318,89 @@ exports.getUserById = async (req, res) => {
     res.status(500).json({ msg: "Erreur serveur", error: err.message });
   }
 };
+
+
+exports.completeProfile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ msg: "Utilisateur introuvable" });
+    }
+
+    // =========================
+    // CHAMPS SIMPLES
+    // =========================
+    const fields = [
+      'telephone',
+      'metier',
+      'nationalites',
+      'video',
+      'description',
+      'valeurs',
+      'lieuPrestation',
+      'typeCours',
+      'publicCible',
+      'siteWeb',
+      'instagram',
+      'linkedin'
+    ];
+
+    fields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    // =========================
+    // BOOLÉEN PMR
+    // =========================
+    if (req.body.pmr !== undefined) {
+      user.pmr = req.body.pmr === 'true' || req.body.pmr === true;
+    }
+
+    // =========================
+    // TABLEAUX
+    // =========================
+    if (req.body.langues) {
+      user.langues = Array.isArray(req.body.langues)
+        ? req.body.langues
+        : [req.body.langues];
+    }
+
+    if (req.body.domaine) {
+      user.domaine = Array.isArray(req.body.domaine)
+        ? req.body.domaine
+        : [req.body.domaine];
+    }
+
+    // =========================
+    // PHOTO
+    // =========================
+    if (req.cloudinaryUrl) {
+      user.photo = req.cloudinaryUrl;
+    }
+
+    // =========================
+    // PROFIL COMPLÉTÉ
+    // =========================
+    user.isProfileCompleted = true;
+
+    await user.save();
+
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    res.status(200).json({
+      msg: "Profil complété avec succès",
+      user: userWithoutPassword
+    });
+
+  } catch (error) {
+    console.error("❌ COMPLETE PROFILE ERROR:", error);
+    res.status(500).json({
+      msg: "Erreur serveur lors de la complétion du profil",
+      error: error.message
+    });
+  }
+};

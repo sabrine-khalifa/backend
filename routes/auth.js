@@ -6,6 +6,9 @@ const cloudinary = require('cloudinary').v2;
 
 require('dotenv').config();
 
+const { completeProfile } = require('../controllers/authController');
+
+
 // ✅ Configuration Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -72,5 +75,16 @@ router.post('/reset-password/:token', resetPassword);
 router.put('/:id', verifyToken, upload.single('photo'), uploadToCloudinary, updateUser);
 router.get("/:id", getUserById);
 router.get('/verify-email/:token', verifyEmail);
+
+
+
+router.put(
+  '/complete-profile/:id',
+  verifyToken,
+  upload.single('photo'),
+  uploadToCloudinary,
+  completeProfile
+);
+
 
 module.exports = router;
