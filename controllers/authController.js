@@ -152,7 +152,9 @@ exports.login = async (req, res) => {
         pmr: user.pmr,
         typeCours: user.typeCours,
         publicCible: user.publicCible,
-        liens: user.liens,
+        siteWeb: user.siteWeb,
+  instagram: user.instagram,
+  linkedin: user.linkedin,
         typeCreateur: user.typeCreateur
       },
     });
@@ -375,6 +377,7 @@ exports.completeProfile = async (req, res) => {
         : [req.body.domaine];
     }
 
+    
     // =========================
     // PHOTO
     // =========================
