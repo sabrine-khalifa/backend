@@ -153,8 +153,8 @@ exports.login = async (req, res) => {
         typeCours: user.typeCours,
         publicCible: user.publicCible,
         siteWeb: user.siteWeb,
-  instagram: user.instagram,
-  linkedin: user.linkedin,
+       instagram: user.instagram,
+       linkedin: user.linkedin,
         typeCreateur: user.typeCreateur
       },
     });
@@ -194,10 +194,27 @@ exports.updateUser = async (req, res) => {
 
     // Mise à jour des champs
     const updatableFields = [
-      'name', 'prenom', 'email', 'role', 'metier', 'domaine', 'nationalites',
-      'video', 'description', 'valeurs', 'lieuPrestation', 'typeCours',
-      'publicCible', 'liens'
-    ];
+  'name',
+  'prenom',
+  'email',
+  'role',
+  'metier',
+  'domaine',
+  'nationalites',
+  'video',
+  'description',
+  'valeurs',
+  'lieuPrestation',
+  'typeCours',
+  'publicCible',
+  'liens',
+
+  // ✅ AJOUTE CECI
+  'siteWeb',
+  'instagram',
+  'linkedin'
+];
+
 
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) user[field] = req.body[field];
@@ -230,7 +247,10 @@ if (req.cloudinaryUrl) {
     await user.save();
 
     const { password, ...userWithoutPassword } = user.toObject();
-    res.json(userWithoutPassword);
+    res.json({
+  msg: "Profil complété avec succès",
+  user: userWithoutPassword
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Erreur serveur", error: err.message });
