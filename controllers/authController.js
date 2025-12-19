@@ -248,7 +248,7 @@ if (req.cloudinaryUrl) {
 
     const { password, ...userWithoutPassword } = user.toObject();
     res.json({
-  msg: "Profil complété avec succès",
+  msg: "mis a jour profile avec succès",
   user: userWithoutPassword
 });
   } catch (err) {
