@@ -43,6 +43,16 @@ exports.createService = async (req, res) => {
 
     const createur = req.userId;
 
+    // 🔥 NORMALISATION DATE SERVICE (FormData fix)
+const rawDateService = req.body.dateService;
+
+const normalizedDateService = Array.isArray(rawDateService)
+  ? rawDateService.filter(Boolean)
+  : rawDateService
+    ? [rawDateService]
+    : [];
+
+
     // ✅ date à convenir
    const dateAConvenir = String(req.body.dateAConvenir) === "true";
 
@@ -61,15 +71,10 @@ exports.createService = async (req, res) => {
     }
 
     // ✅ Date obligatoire UNIQUEMENT si pas "à convenir"
-    if (!dateAConvenir) {
-      if (
-        !dateService ||
-        !Array.isArray(dateService) ||
-        dateService.length === 0
-      ) {
-        return res.status(400).json({ erreur: "Date manquante." });
-      }
-    }
+  if (!dateAConvenir && normalizedDateService.length === 0) {
+  return res.status(400).json({ erreur: "Date manquante." });
+}
+
 
     // --- NORMALISATION ---
     const categoriesArray = Array.isArray(categories)
@@ -91,26 +96,30 @@ exports.createService = async (req, res) => {
     const images = req.cloudinaryUrls || [];
 
     // --- CRÉATION ---
-    const newService = new Service({
-      titre,
-      description,
-      categories: categoriesArray,
-      typePrestation,
-      creditsProposes,
-      images,
-      dateService: dateAConvenir ? [] : dateService, // ✅
-      heure: dateAConvenir ? "" : heure,              // ✅
-      duree,
-      typeCours,
-      publicCible,
-      prerequis: normalizedPrerequis,
-      materiel: normalizedMateriel,
-      accessiblePMR: normalizedAccessiblePMR,
-      lieu,
-      nombrePlaces,
-      dateAConvenir, // ✅ IMPORTANT
-      createur,
-    });
+   const newService = new Service({
+  titre,
+  description,
+  categories: categoriesArray,
+  typePrestation,
+  creditsProposes,
+  images,
+
+  dateService: dateAConvenir ? [] : normalizedDateService,
+  heure: dateAConvenir ? "" : heure,
+
+  duree,
+  typeCours,
+  publicCible,
+  prerequis: normalizedPrerequis,
+  materiel: normalizedMateriel,
+  accessiblePMR: normalizedAccessiblePMR,
+  lieu,
+  nombrePlaces,
+
+  dateAConvenir,
+  createur,
+});
+
 
     await newService.save();
 
