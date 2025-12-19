@@ -44,8 +44,8 @@ exports.createService = async (req, res) => {
     const createur = req.userId;
 
     // ✅ date à convenir
-    const dateAConvenir =
-      req.body.dateAConvenir === "true" || req.body.dateAConvenir === true;
+   const dateAConvenir = String(req.body.dateAConvenir) === "true";
+
 
     // --- VALIDATIONS ---
     if (!titre || titre.length < 3) {
