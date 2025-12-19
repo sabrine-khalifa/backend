@@ -23,9 +23,6 @@ exports.getServices = async (req, res) => {
 // Créer un nouveau service
 exports.createService = async (req, res) => {
   try {
-    console.log("🎯 Début createService");
-    console.log("BODY:", req.body);
-    console.log("CLOUDINARY URLs:", req.cloudinaryUrls); // ✅ Clé du succès
     const {
       titre,
       description,
@@ -37,8 +34,8 @@ exports.createService = async (req, res) => {
       duree,
       typeCours,
       publicCible,
-      prerequis, // ✅ AJOUT
-      materiel, // ✅ AJOUT
+      prerequis,
+      materiel,
       accessiblePMR,
       lieu,
       nombrePlaces,
@@ -46,69 +43,54 @@ exports.createService = async (req, res) => {
 
     const createur = req.userId;
 
-   // --- VALIDATIONS ---
-if (!titre || titre.length < 3) {
-  return res.status(400).json({ erreur: "Titre invalide." });
-}
-if (!description || description.length < 10) {
-  return res.status(400).json({ erreur: "Description invalide." });
-}
-if (
-  creditsProposes === undefined ||
-  creditsProposes === null ||
-  Number(creditsProposes) < 1
-) {
-  return res.status(400).json({ erreur: "Crédits invalides." });
-}
+    // ✅ date à convenir
+    const dateAConvenir =
+      req.body.dateAConvenir === "true" || req.body.dateAConvenir === true;
 
-const dateAConvenir = req.body.dateAConvenir === "true" || req.body.dateAConvenir === true;
-
-// Validation de la date
-if (!dateAConvenir) {
-  if (!dateService || !Array.isArray(dateService) || dateService.length === 0 || dateService.every(d => !d)) {
-    return res.status(400).json({ erreur: "Date manquante." });
-  }
-}
-
-
-
-   
-
-
-
-    if (!createur || createur === "null") {
-      return res
-        .status(401)
-        .json({ erreur: "Utilisateur non authentifié (createur manquant)." });
+    // --- VALIDATIONS ---
+    if (!titre || titre.length < 3) {
+      return res.status(400).json({ erreur: "Titre invalide." });
     }
 
-    // 🔹 Récupération des images envoyées (si multiples)
+    if (!description || description.length < 10) {
+      return res.status(400).json({ erreur: "Description invalide." });
+    }
+
+    if (!creditsProposes || Number(creditsProposes) < 1) {
+      return res.status(400).json({ erreur: "Crédits invalides." });
+    }
+
+    // ✅ Date obligatoire UNIQUEMENT si pas "à convenir"
+    if (!dateAConvenir) {
+      if (
+        !dateService ||
+        !Array.isArray(dateService) ||
+        dateService.length === 0
+      ) {
+        return res.status(400).json({ erreur: "Date manquante." });
+      }
+    }
+
+    // --- NORMALISATION ---
+    const categoriesArray = Array.isArray(categories)
+      ? categories
+      : [categories].filter(Boolean);
+
+    const normalizedPrerequis = Array.isArray(prerequis)
+      ? prerequis[0]
+      : prerequis;
+
+    const normalizedMateriel = Array.isArray(materiel)
+      ? materiel[0]
+      : materiel;
+
+    const normalizedAccessiblePMR =
+      accessiblePMR === true || accessiblePMR === "true";
+
+    // 🔹 Images
     const images = req.cloudinaryUrls || [];
-    console.log("FILES:", req.files);
+
     // --- CRÉATION ---
-    const categoriesArray = Array.isArray(req.body.categories)
-      ? req.body.categories
-      : [req.body.categories].filter(Boolean); // pour éviter undefined
-
-
-      const normalizedPrerequis = Array.isArray(prerequis)
-  ? prerequis[0]
-  : prerequis;
-
-const normalizedMateriel = Array.isArray(materiel)
-  ? materiel[0]
-  : materiel;
-
-const normalizedAccessiblePMR = Array.isArray(accessiblePMR)
-  ? accessiblePMR[0] === "true"
-  : accessiblePMR === true || accessiblePMR === "true";
-
-
-  prerequis: normalizedPrerequis;
-materiel: normalizedMateriel;
-accessiblePMR: normalizedAccessiblePMR;
-
-
     const newService = new Service({
       titre,
       description,
@@ -116,35 +98,32 @@ accessiblePMR: normalizedAccessiblePMR;
       typePrestation,
       creditsProposes,
       images,
-      dateService,
-      heure,
+      dateService: dateAConvenir ? [] : dateService, // ✅
+      heure: dateAConvenir ? "" : heure,              // ✅
       duree,
       typeCours,
       publicCible,
-      prerequis, // ✅
-      materiel,
-      accessiblePMR,
+      prerequis: normalizedPrerequis,
+      materiel: normalizedMateriel,
+      accessiblePMR: normalizedAccessiblePMR,
       lieu,
       nombrePlaces,
+      dateAConvenir, // ✅ IMPORTANT
       createur,
     });
 
-    console.log("BODY:", req.body);
-    console.log("FILES:", req.files);
+    await newService.save();
 
-await newService.validate();
-
-    console.log("✅ Validation OK");
-
-    const saved = await newService.save();
-    res
-      .status(201)
-      .json({ message: "Service créé avec succès.", service: saved });
+    res.status(201).json({
+      message: "Service créé avec succès.",
+      service: newService,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ erreur: "Erreur serveur." });
   }
 };
+
 
 exports.getServiceById = async (req, res) => {
   try {
