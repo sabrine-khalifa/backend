@@ -7,6 +7,7 @@ const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
 
 const { completeProfile } = require('../controllers/authController');
+const auth = require("../middlewares/auth");
 
 
 // ✅ Configuration Cloudinary
@@ -72,8 +73,8 @@ router.post('/refreshToken', refreshToken);
 
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
-router.put('/:id', verifyToken, upload.single('photo'), uploadToCloudinary, authMiddleware,updateUser);
-router.put("/users/:id", authMiddleware, updateUser);
+router.put('/:id', verifyToken, upload.single('photo'), uploadToCloudinary, auth,updateUser);
+router.put("/users/:id", auth, updateUser);
 
 router.get("/:id", getUserById);
 router.get('/verify-email/:token', verifyEmail);
