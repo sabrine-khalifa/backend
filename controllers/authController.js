@@ -209,7 +209,7 @@ exports.updateUser = async (req, res) => {
   'publicCible',
   'liens',
 
-  // ✅ AJOUTE CECI
+ // ✅ AJOUTE CECI
   'siteWeb',
   'instagram',
   'linkedin'
