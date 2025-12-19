@@ -10,6 +10,11 @@ const serviceSchema = new mongoose.Schema({
   dateService: [{ type: Date }],
   heure: { type: String }, 
   duree: { type: String }, 
+
+  dateAConvenir: {
+    type: Boolean,
+    default: false,
+  },
   typeCours: { type: String, enum: ['Individuel', 'Collectif', 'Groupe'] },
   publicCible: { type: String },
   prerequis: { type: String, default: "Aucun prérequis" },
