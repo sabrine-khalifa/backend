@@ -72,7 +72,7 @@ router.post('/refreshToken', refreshToken);
 
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
-router.put('/:id', verifyToken, upload.single('photo'), uploadToCloudinary, updateUser);
+router.put('/:id', verifyToken, upload.single('photo'), uploadToCloudinary, authMiddleware,updateUser);
 router.put("/users/:id", authMiddleware, updateUser);
 
 router.get("/:id", getUserById);
