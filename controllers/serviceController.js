@@ -22,6 +22,8 @@ exports.getServices = async (req, res) => {
 
 // Créer un nouveau service
 exports.createService = async (req, res) => {
+   console.log("BODY :", req.body);
+  console.log("FILES :", req.files);
   try {
     const {
       titre,
