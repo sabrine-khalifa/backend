@@ -5,6 +5,11 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   prenom: { type: String },
   email: { type: String, unique: true, required: true },
+    telephone: {
+    type: String,
+    trim: true,
+    default: null,
+  },
   password: { type: String, required: true },
   photo: { type: String }, // URL de la photo
   credits: { type: Number, default: 100 },
@@ -18,6 +23,7 @@ const userSchema = new mongoose.Schema({
     enum: ['particulier', 'createur'], 
     default: 'particulier' 
   },
+
 
   // Champs spécifiques au Créateur
   metier: { type: String },
