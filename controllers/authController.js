@@ -197,6 +197,7 @@ exports.updateUser = async (req, res) => {
   'name',
   'prenom',
   'email',
+  'telephone',  
   'role',
   'metier',
   'domaine',
