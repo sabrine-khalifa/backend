@@ -4,7 +4,7 @@ const serviceSchema = new mongoose.Schema({
   titre: { type: String, required: true, minlength: 3 },
   description: { type: String, required: true, minlength: 10 },
   categories: [ {type: String} ],
-  typePrestation: { type: String, enum: ['Présentiel', 'En ligne', 'Distanciel & Présentiel '], required: true },
+  typePrestation: { type: String, enum: ['Présentiel', 'En ligne', 'Distanciel & Présentiel'], required: true },
   images:  [{ type: String }],
   lieu: { type: String },
   dateService: [{ type: Date }],
