@@ -204,7 +204,8 @@ exports.reserverService = async (req, res) => {
     });
     await reservation.save();
 
-    res.json({ msg: "Réservation confirmée", service });
+    res.json({ msg: "Réservation confirmée", service,
+  credits: acheteur.credits, });
   } catch (err) {
     console.error("❌ Erreur réservation :", err);
     res.status(500).json({ msg: "Erreur serveur" });
