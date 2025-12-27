@@ -151,14 +151,31 @@ exports.getServiceById = async (req, res) => {
 };
 
 // Réservation d’un service
+
+
 exports.reserverService = async (req, res) => {
   try {
     const serviceId = req.params.id;
     const userId = req.userId;
 
     const service = await Service.findById(serviceId);
-    if (!service) return res.status(404).json({ msg: "Service introuvable" });
+    if (!service) {
+      return res.status(404).json({ msg: "Service introuvable" });
+    }
 
+    // 🔒 1️⃣ VÉRIFIER SI DÉJÀ RÉSERVÉ
+    const dejaReserve = await Reservation.findOne({
+      service: serviceId,
+      utilisateur: userId,
+    });
+
+    if (dejaReserve) {
+      return res.status(400).json({
+        msg: "Vous avez déjà réservé ce service",
+      });
+    }
+
+    // 🔒 2️⃣ Vérifier les places
     if (service.nombrePlaces <= 0) {
       return res.status(400).json({ msg: "Plus de places disponibles" });
     }
@@ -166,10 +183,12 @@ exports.reserverService = async (req, res) => {
     const acheteur = await User.findById(userId);
     const createur = await User.findById(service.createur);
 
+    // 🔒 3️⃣ Vérifier crédits
     if (acheteur.credits < service.creditsProposes) {
       return res.status(400).json({ msg: "Crédits insuffisants" });
     }
 
+    // 🔄 4️⃣ Mise à jour crédits et places
     acheteur.credits -= service.creditsProposes;
     createur.credits += service.creditsProposes;
     service.nombrePlaces -= 1;
@@ -178,7 +197,7 @@ exports.reserverService = async (req, res) => {
     await createur.save();
     await service.save();
 
-    // Créer la réservation
+    // ✅ 5️⃣ Créer la réservation
     const reservation = new Reservation({
       service: serviceId,
       utilisateur: userId,
