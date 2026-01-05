@@ -204,8 +204,18 @@ exports.reserverService = async (req, res) => {
     });
     await reservation.save();
 
-    res.json({ msg: "Réservation confirmée", service,
-  credits: acheteur.credits, });
+  // 🔁 Recharger le service avec le créateur
+const populatedService = await Service.findById(serviceId).populate(
+  "createur",
+  "prenom name photo"
+);
+
+res.json({
+  msg: "Réservation confirmée",
+  service: populatedService,
+  credits: acheteur.credits,
+});
+
   } catch (err) {
     console.error("❌ Erreur réservation :", err);
     res.status(500).json({ msg: "Erreur serveur" });
