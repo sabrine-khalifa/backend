@@ -209,11 +209,14 @@ const populatedService = await Service.findById(serviceId).populate(
   "createur",
   "prenom name photo"
 );
+const updatedAcheteur = await User.findById(userId).select(
+  "name prenom email credits photo"
+);
 
 res.json({
   msg: "Réservation confirmée",
   service: populatedService,
-  credits: acheteur.credits,
+    user: updatedAcheteur,
 });
 
   } catch (err) {
