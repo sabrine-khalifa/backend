@@ -121,7 +121,7 @@ exports.login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ msg: "Identifiants invalides" });
 
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "12h",
     });
 
     const refreshToken = jwt.sign(
@@ -175,7 +175,7 @@ exports.refreshToken = (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '12h' }
     );
 
     res.json({ accessToken: newAccessToken });
