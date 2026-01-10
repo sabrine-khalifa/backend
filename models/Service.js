@@ -15,7 +15,9 @@ const serviceSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  typeCours: { type: String, enum: ['Individuel', 'Collectif', 'Individuelle & Collective '] },
+  typeCours: { type: String, enum: ['Individuel', 'Collectif', 'Individuelle & Collective'],
+
+   },
   publicCible: { type: String },
   prerequis: { type: String, default: "Aucun prérequis" },
   materiel: { type: String, default: "Aucun matériel requis" },
