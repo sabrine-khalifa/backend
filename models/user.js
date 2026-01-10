@@ -35,7 +35,10 @@ const userSchema = new mongoose.Schema({
   valeurs: { type: String },
   lieuPrestation: { type: String, enum: ['En ligne', 'Présentiel', 'Distanciel & Présentiel'] },
   pmr: { type: Boolean, default: false },
-  typeCours: { type: String, enum: ['Individuelle & Collective ', 'Individuel', 'Collectif'] },
+
+
+  typeCours: { type: String, enum: ['Individuel', 'Collectif', 'Individuelle & Collective'],
+},
   publicCible: { type: String },
   liens: { type: String },
   siteWeb: { type: String },
