@@ -252,7 +252,7 @@ exports.getServicesDisponiblesByCreator = async (req, res) => {
   }
 };
 
-// 🔹 Mise à jour d’un service
+
 // 🔹 Mise à jour d'un service
 exports.updateService = async (req, res) => {
   try {
@@ -290,6 +290,7 @@ exports.updateService = async (req, res) => {
       dateService,
       heure,
       duree,
+      dateAConvenir,
       typeCours,
       publicCible,
       prerequis,
@@ -357,6 +358,16 @@ exports.updateService = async (req, res) => {
 
     service.heure = heure || service.heure;
     service.duree = duree || service.duree;
+    if (dateAConvenir !== undefined) {
+  service.dateAConvenir =
+    dateAConvenir === true || dateAConvenir === "true";
+}
+
+    if (service.dateAConvenir === true) {
+  service.dateService = [];
+  service.heure = "";
+}
+
 
     if (typeCours !== undefined && typeCours !== "") {
       service.typeCours = typeCours;
