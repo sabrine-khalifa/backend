@@ -210,7 +210,7 @@ const populatedService = await Service.findById(serviceId).populate(
   "prenom name photo"
 );
 const updatedAcheteur = await User.findById(userId).select(
-  "name prenom email credits photo"
+  "name prenom email credits photo role"
 );
 
 res.json({
