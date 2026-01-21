@@ -346,31 +346,41 @@ exports.updateService = async (req, res) => {
     service.creditsProposes = prix;
     service.images = images;
 
-    // 🔹 DATE - Ne modifier que si dateService est envoyé
-    if (dateService !== undefined) {
-      const rawDates = Array.isArray(dateService) ? dateService : [dateService];
-      const parsedDates = rawDates
-        .map((d) => {
-          const date = new Date(d);
-          return isNaN(date.getTime()) ? null : date;
-        })
-        .filter(Boolean);
-      service.dateService = parsedDates;
-    }
-    // Si dateService n'est pas envoyé, on garde l'existant
+    
 
-    service.heure = heure || service.heure;
-    service.duree = duree || service.duree;
-    if (dateAConvenir !== undefined) {
+// ---------- DATE À CONVENIR ----------
+if (dateAConvenir !== undefined) {
   service.dateAConvenir =
     dateAConvenir === true || dateAConvenir === "true";
 }
 
-    if (service.dateAConvenir === true) {
+// ---------- SI DATE À CONVENIR ----------
+if (service.dateAConvenir === true) {
   service.dateService = [];
   service.heure = "";
+} else {
+  // ---------- DATES CLASSIQUES ----------
+  if (dateService !== undefined) {
+    const rawDates = Array.isArray(dateService)
+      ? dateService
+      : [dateService];
+
+    service.dateService = rawDates
+      .map((d) => {
+        const date = new Date(d);
+        return isNaN(date.getTime()) ? null : date;
+      })
+      .filter(Boolean);
+  }
+
+  // ---------- HEURE ----------
+  if (heure !== undefined) {
+    service.heure = heure;
+  }
 }
 
+    service.heure = heure || service.heure;
+    service.duree = duree || service.duree;
 
     if (typeCours !== undefined && typeCours !== "") {
       service.typeCours = typeCours;
