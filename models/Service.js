@@ -22,7 +22,10 @@ const serviceSchema = new mongoose.Schema({
   prerequis: { type: String, default: "Aucun prérequis" },
   materiel: { type: String, default: "Aucun matériel requis" },
   accessiblePMR: { type: Boolean, default: false },
-
+  pmrDetails: {
+  type: String,
+  default: "",
+},
   creditsProposes: { type: Number, required: true, min: 1 },
   nombrePlaces: { type: Number },
   createur: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

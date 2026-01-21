@@ -39,6 +39,7 @@ exports.createService = async (req, res) => {
       prerequis,
       materiel,
       accessiblePMR,
+      pmrDetails,
       lieu,
       nombrePlaces,
     } = req.body;
@@ -96,6 +97,10 @@ const normalizedDateService = Array.isArray(rawDateService)
 
     // 🔹 Images
     const images = req.cloudinaryUrls || [];
+    const normalizedPmrDetails = Array.isArray(pmrDetails)
+  ? pmrDetails[0]
+  : pmrDetails;
+
 
     // --- CRÉATION ---
    const newService = new Service({
@@ -105,19 +110,17 @@ const normalizedDateService = Array.isArray(rawDateService)
   typePrestation,
   creditsProposes,
   images,
-
   dateService: dateAConvenir ? [] : normalizedDateService,
   heure: dateAConvenir ? "" : heure,
-
   duree,
   typeCours,
   publicCible,
   prerequis: normalizedPrerequis,
   materiel: normalizedMateriel,
   accessiblePMR: normalizedAccessiblePMR,
+  pmrDetails: normalizedPmrDetails,
   lieu,
   nombrePlaces,
-
   dateAConvenir,
   createur,
 });
