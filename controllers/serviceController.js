@@ -404,6 +404,10 @@ if (Array.isArray(accessiblePMR)) {
     accessiblePMR === true || accessiblePMR === "true";
 }
 
+// 🧹 Nettoyage PMR
+if (service.accessiblePMR === false) {
+  service.pmrDetails = "";
+}
 
     service.lieu = lieu || service.lieu;
 
