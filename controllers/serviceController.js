@@ -282,7 +282,13 @@ exports.updateService = async (req, res) => {
         erreur: "Accès refusé. Vous n'êtes pas le propriétaire de ce service.",
       });
     }
+// 🔥 NORMALISATION dateAConvenir (FormData checkbox fix)
+const rawDateAConvenir = req.body.dateAConvenir;
 
+const isDateAConvenir =
+  rawDateAConvenir === true ||
+  rawDateAConvenir === "true" ||
+  (Array.isArray(rawDateAConvenir) && rawDateAConvenir.includes("true"));
     // Récupérer les champs à mettre à jour
     const {
       titre,
@@ -293,7 +299,6 @@ exports.updateService = async (req, res) => {
       dateService,
       heure,
       duree,
-      dateAConvenir,
       typeCours,
       publicCible,
       prerequis,
@@ -349,13 +354,16 @@ exports.updateService = async (req, res) => {
     
 
 // ---------- DATE À CONVENIR ----------
-if (dateAConvenir !== undefined) {
-  service.dateAConvenir =
-    dateAConvenir === true || dateAConvenir === "true";
-}
 
-// ---------- SI DATE À CONVENIR ----------
-if (service.dateAConvenir === true) {
+
+ 
+
+// ---------- DATE À CONVENIR ----------
+service.dateAConvenir = isDateAConvenir;
+
+// ---------- GESTION DATE / HEURE ----------
+if (isDateAConvenir === true) {
+  // 🧹 NETTOYAGE FORCÉ
   service.dateService = [];
   service.heure = "";
 } else {
