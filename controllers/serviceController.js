@@ -379,7 +379,6 @@ if (service.dateAConvenir === true) {
   }
 }
 
-    service.heure = heure || service.heure;
     service.duree = duree || service.duree;
 
     if (typeCours !== undefined && typeCours !== "") {
