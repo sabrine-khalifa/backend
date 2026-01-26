@@ -265,7 +265,8 @@ exports.updateService = async (req, res) => {
     console.log("dateService reçue :", req.body.dateService);
     console.log("Tout le body reçu :", req.body);
 
-    // Vérifier si l'utilisateur est authentifié
+    // Vérifier si l'utilisateur est authentifi
+
     if (!userId) {
       return res.status(401).json({ erreur: "Utilisateur non authentifié." });
     }
